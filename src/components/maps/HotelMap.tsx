@@ -4,7 +4,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
-import { Loader } from "@googlemaps/js-api-loader";
+import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { useHotels } from "@/hooks/useHotels";
 import { useMapBounds } from "@/hooks/useMapBounds";
 import { GOOGLE_MAPS_API_KEY, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from "@/lib/constants";
@@ -26,20 +26,20 @@ export function HotelMap() {
 
         const initMap = async () => {
             try {
-                const loader = new Loader({
-                    apiKey: GOOGLE_MAPS_API_KEY,
-                    version: "weekly",
+                setOptions({
+                    key: GOOGLE_MAPS_API_KEY,
+                    v: "weekly",
                     libraries: ["marker"],
                 });
 
                 // Initialize libraries
-                const coreLibrary = await loader.importLibrary("maps");
-                const markerLibrary = await loader.importLibrary("marker");
+                const coreLibrary = await importLibrary("maps") as google.maps.MapsLibrary;
+                const markerLibrary = await importLibrary("marker") as google.maps.MarkerLibrary;
 
                 const map = new coreLibrary.Map(mapRef.current!, {
                     center: MAP_DEFAULT_CENTER,
                     zoom: MAP_DEFAULT_ZOOM,
-                    mapId: "HOTEL_SEARCH_MAP_ID", // Required for AdvancedMarkerElement
+                    mapId: "DEMO_MAP_ID", // Allows AdvancedMarker testing without valid API map ID
                     mapTypeControl: false,
                     streetViewControl: false,
                     fullscreenControl: true,

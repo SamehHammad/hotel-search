@@ -3,6 +3,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { HotelCard } from "./HotelCard";
 import { HotelCardSkeleton } from "./HotelCardSkeleton";
 import { useHotels } from "@/hooks/useHotels";
@@ -53,6 +54,9 @@ export function HotelList() {
         );
     }
 
+    const searchParams = useSearchParams();
+    const hasSearchQuery = !!searchParams.get("q");
+
     // Empty state
     if (!loading && hotels.length === 0) {
         return (
@@ -61,10 +65,13 @@ export function HotelList() {
                     <span className="text-4xl">🏨</span>
                 </div>
                 <h3 className="text-xl font-bold text-slate-800 mb-2">
-                    {tCommon("noResults")}
+                    {hasSearchQuery ? tCommon("noResults") : "Ready to explore?"}
                 </h3>
                 <p className="text-slate-500 max-w-sm mb-6">
-                    {t("resultsCount", { count: 0 })}. Try adjusting your search filters or map bounds.
+                    {hasSearchQuery
+                        ? `${t("resultsCount", { count: 0 })}. Try adjusting your search filters or map bounds.`
+                        : "Enter a destination, check-in dates, and guests above to begin finding your perfect stay."
+                    }
                 </p>
             </div>
         );

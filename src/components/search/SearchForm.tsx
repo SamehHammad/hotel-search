@@ -3,7 +3,7 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { Search, MapPin } from "lucide-react";
@@ -22,18 +22,21 @@ interface SearchFormProps {
 export function SearchForm({ className = "", variant = "hero" }: SearchFormProps) {
     const t = useTranslations("search");
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
-    const { filters, setFilters } = useHotelsStore();
-
-    // Local state for the form
-    const [location, setLocation] = useState(filters.q || DEFAULT_SEARCH_FILTERS.q);
+    // Local state for the form, initialized from URL search params
+    const [location, setLocation] = useState(searchParams.get("q") || "");
     const [checkIn, setCheckIn] = useState<Date | undefined>(
-        filters.check_in_date ? new Date(filters.check_in_date) : new Date(DEFAULT_SEARCH_FILTERS.check_in_date)
+        searchParams.get("check_in_date") ? new Date(searchParams.get("check_in_date")!) : new Date(DEFAULT_SEARCH_FILTERS.check_in_date)
     );
     const [checkOut, setCheckOut] = useState<Date | undefined>(
-        filters.check_out_date ? new Date(filters.check_out_date) : new Date(DEFAULT_SEARCH_FILTERS.check_out_date)
+        searchParams.get("check_out_date") ? new Date(searchParams.get("check_out_date")!) : new Date(DEFAULT_SEARCH_FILTERS.check_out_date)
     );
-    const [guests, setGuests] = useState(filters.guests || DEFAULT_SEARCH_FILTERS.guests);
+    const [guests, setGuests] = useState({
+        adults: parseInt(searchParams.get("adults") || String(DEFAULT_SEARCH_FILTERS.guests.adults), 10),
+        children: parseInt(searchParams.get("children") || String(DEFAULT_SEARCH_FILTERS.guests.children), 10),
+    });
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -48,18 +51,20 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
         const checkInStr = checkIn ? format(checkIn, "yyyy-MM-dd") : DEFAULT_SEARCH_FILTERS.check_in_date;
         const checkOutStr = checkOut ? format(checkOut, "yyyy-MM-dd") : DEFAULT_SEARCH_FILTERS.check_out_date;
 
-        // Persist to store (this will clear old hotels and trigger refetch if on hotels page)
-        setFilters({
-            q: location,
-            check_in_date: checkInStr,
-            check_out_date: checkOutStr,
-            guests,
-            bounds: null, // Reset bounds on new search query
-        });
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("q", location);
+        params.set("check_in_date", checkInStr);
+        params.set("check_out_date", checkOutStr);
+        params.set("adults", String(guests.adults));
+        params.set("children", String(guests.children));
+        params.delete("bounds");
+        params.delete("page");
 
-        // Navigate to hotels page if we are on hero variant
+        // Navigate to hotels page with shared URL state
         if (variant === "hero") {
-            router.push("/hotels");
+            router.push(`/hotels?${params.toString()}`);
+        } else {
+            router.push(`${pathname}?${params.toString()}`);
         }
     };
 

@@ -10,7 +10,7 @@ interface RequestOptions extends RequestInit {
 function buildUrl(path: string, params?: RequestOptions["params"]): string {
     const base = typeof window === "undefined"
         ? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000"
-        : "";
+        : window.location.origin;
 
     const url = new URL(`${base}${path}`);
 
