@@ -1,0 +1,68 @@
+{
+    "common": {
+        "appName": "بحث الفنادق",
+        "loading": "جاري التحميل...",
+        "error": "حدث خطأ ما",
+        "retry": "حاول مجدداً",
+        "noResults": "لا توجد فنادق",
+        "learnMore": "اعرف المزيد"
+    },
+    "nav": {
+        "home": "الرئيسية",
+        "search": "بحث",
+        "hotels": "الفنادق"
+    },
+    "search": {
+        "title": "اعثر على فندقك المثالي",
+        "subtitle": "ابحث في أكثر من 14,000 فندق حول العالم",
+        "locationLabel": "الوجهة",
+        "locationPlaceholder": "إلى أين تذهب؟",
+        "checkInLabel": "تاريخ الوصول",
+        "checkOutLabel": "تاريخ المغادرة",
+        "guestsLabel": "الضيوف",
+        "adultsLabel": "بالغون",
+        "childrenLabel": "أطفال",
+        "searchButton": "بحث عن فنادق",
+        "searching": "جاري البحث...",
+        "validation": {
+            "locationRequired": "الرجاء إدخال وجهة",
+            "checkInRequired": "تاريخ الوصول مطلوب",
+            "checkOutRequired": "تاريخ المغادرة مطلوب",
+            "dateOrder": "تاريخ المغادرة يجب أن يكون بعد الوصول"
+        }
+    },
+    "hotels": {
+        "title": "الفنادق",
+        "resultsCount": "تم العثور على {count} فندق",
+        "pricePerNight": "/ ليلة",
+        "totalPrice": "الإجمالي",
+        "beforeTaxes": "قبل الضرائب",
+        "checkIn": "تسجيل الدخول",
+        "checkOut": "تسجيل الخروج",
+        "rating": "التقييم",
+        "reviews": "تقييم",
+        "amenities": "المرافق",
+        "nearbyPlaces": "أماكن قريبة",
+        "viewDeal": "عرض الصفقة",
+        "deal": "عرض",
+        "ecoCertified": "معتمد بيئياً",
+        "loadingMore": "تحميل المزيد من الفنادق...",
+        "noMoreHotels": "لا مزيد من الفنادق",
+        "hotelClass": "تصنيف الفندق",
+        "locationRating": "الموقع",
+        "transitRating": "المواصلات",
+        "doRating": "الأنشطة",
+        "airportRating": "المطار"
+    },
+    "map": {
+        "title": "عرض الخريطة",
+        "markersLoaded": "فنادق على الخريطة",
+        "updateOnMove": "تحديث النتائج عند تحريك الخريطة"
+    },
+    "errors": {
+        "unauthorized": "فشل المصادقة",
+        "notFound": "الصفحة غير موجودة",
+        "serverError": "خطأ في الخادم، الرجاء المحاولة مجدداً",
+        "network": "خطأ في الشبكة، تحقق من الاتصال"
+    }
+}

@@ -1,0 +1,68 @@
+{
+    "common": {
+        "appName": "HotelSearch",
+        "loading": "Loading...",
+        "error": "Something went wrong",
+        "retry": "Try Again",
+        "noResults": "No hotels found",
+        "learnMore": "Learn More"
+    },
+    "nav": {
+        "home": "Home",
+        "search": "Search",
+        "hotels": "Hotels"
+    },
+    "search": {
+        "title": "Find Your Perfect Hotel",
+        "subtitle": "Search over 14,000 hotels worldwide",
+        "locationLabel": "Destination",
+        "locationPlaceholder": "Where are you going?",
+        "checkInLabel": "Check-in",
+        "checkOutLabel": "Check-out",
+        "guestsLabel": "Guests",
+        "adultsLabel": "Adults",
+        "childrenLabel": "Children",
+        "searchButton": "Search Hotels",
+        "searching": "Searching...",
+        "validation": {
+            "locationRequired": "Please enter a destination",
+            "checkInRequired": "Check-in date is required",
+            "checkOutRequired": "Check-out date is required",
+            "dateOrder": "Check-out must be after check-in"
+        }
+    },
+    "hotels": {
+        "title": "Hotels",
+        "resultsCount": "{count} hotels found",
+        "pricePerNight": "/ night",
+        "totalPrice": "Total",
+        "beforeTaxes": "before taxes",
+        "checkIn": "Check-in",
+        "checkOut": "Check-out",
+        "rating": "Rating",
+        "reviews": "reviews",
+        "amenities": "Amenities",
+        "nearbyPlaces": "Nearby",
+        "viewDeal": "View Deal",
+        "deal": "Deal",
+        "ecoCertified": "Eco Certified",
+        "loadingMore": "Loading more hotels...",
+        "noMoreHotels": "No more hotels to load",
+        "hotelClass": "Hotel Class",
+        "locationRating": "Location",
+        "transitRating": "Transit",
+        "doRating": "Things to Do",
+        "airportRating": "Airport"
+    },
+    "map": {
+        "title": "Map View",
+        "markersLoaded": "hotels on map",
+        "updateOnMove": "Update results as map moves"
+    },
+    "errors": {
+        "unauthorized": "Authentication failed",
+        "notFound": "Page not found",
+        "serverError": "Server error, please try again",
+        "network": "Network error, check your connection"
+    }
+}
