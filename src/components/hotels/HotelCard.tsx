@@ -2,7 +2,7 @@
 
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Star, MapPin, Plane, CheckCircle2 } from "lucide-react";
@@ -25,10 +25,11 @@ interface HotelCardProps {
 export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
     const t = useTranslations("hotels");
 
-    const thumbnail =
+    const [imgSrc, setImgSrc] = useState(
         hotel.images && hotel.images.length > 0
             ? hotel.images[0].thumbnail
-            : "/placeholder-hotel.jpg"; // Provide a fallback if needed
+            : "/placeholder.jpg"
+    );
 
     const stars = hotel.extracted_hotel_class
         ? buildStarArray(hotel.extracted_hotel_class)
@@ -40,12 +41,13 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                 {/* Image Section */}
                 <div className="relative w-full sm:w-72 h-48 sm:h-auto shrink-0 group">
                     <Image
-                        src={thumbnail}
+                        src={imgSrc}
                         alt={hotel.name}
                         fill
                         sizes="(max-width: 640px) 100vw, 288px"
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                         loading="lazy"
+                        onError={() => setImgSrc("/placeholder.jpg")}
                     />
                     {hotel.deal && (
                         <Badge className="absolute top-3 right-3 deal-badge shadow-sm z-10 border-none px-3 py-1 bg-amber-500 hover:bg-amber-600">

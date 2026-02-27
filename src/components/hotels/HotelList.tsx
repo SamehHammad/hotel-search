@@ -16,6 +16,9 @@ export function HotelList() {
 
     const { hotels, loading, error, isFetchingMore, pagination, appendHotels } = useHotels();
 
+    const searchParams = useSearchParams();
+    const hasSearchQuery = !!searchParams.get("q");
+
     const hasMore = !!pagination.next_page_token;
 
     // Infinite Scroll hook
@@ -53,9 +56,6 @@ export function HotelList() {
             </div>
         );
     }
-
-    const searchParams = useSearchParams();
-    const hasSearchQuery = !!searchParams.get("q");
 
     // Empty state
     if (!loading && hotels.length === 0) {

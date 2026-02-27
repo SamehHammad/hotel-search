@@ -52,11 +52,20 @@ export function useHotels() {
         const adults = parseInt(searchParams.get("adults") || "2", 10);
         const children = parseInt(searchParams.get("children") || "0", 10);
 
+        const boundsParam = searchParams.get("bounds");
+        const bounds = boundsParam ? {
+            north: parseFloat(boundsParam.split(",")[0]),
+            south: parseFloat(boundsParam.split(",")[1]),
+            east: parseFloat(boundsParam.split(",")[2]),
+            west: parseFloat(boundsParam.split(",")[3]),
+        } : null;
+
         setFilters({
             q,
             check_in_date: searchParams.get("check_in_date") || undefined,
             check_out_date: searchParams.get("check_out_date") || undefined,
             guests: { adults, children },
+            bounds,
         });
 
         fetchHotels();

@@ -6,6 +6,7 @@ import type { Hotel } from "@/types/hotel.types";
 import { BEARER_TOKEN, PAGE_SIZE } from "@/lib/constants";
 
 import { MOCK_HOTELS, generateMoreHotels } from "@/data/mockHotels";
+import { CITY_SUGGESTIONS } from "@/data/suggestions";
 
 // ---** Validate Bearer token **---//
 function validateToken(request: NextRequest): boolean {
@@ -38,21 +39,147 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         return NextResponse.json({ message: "Invalid page parameter" }, { status: 400 });
     }
 
-    // Simulate bounds filtering
-    let hotels = page === 1 ? MOCK_HOTELS : generateMoreHotels(page);
+    // --- Determine potential city from query ---
+    const normalizedQ = q.toLowerCase().trim();
+    const matchedCity = CITY_SUGGESTIONS.find(c =>
+        normalizedQ.includes(c.name.toLowerCase()) ||
+        c.name.toLowerCase().includes(normalizedQ)
+    );
+
+    const isNYC = normalizedQ === "new york hotels" || normalizedQ === "new york";
+
+    // --- Data selection logic ---
+    let hotels: Hotel[] = [];
+
+    if (page === 1) {
+        // Try to filter MOCK_HOTELS for the matched city
+        if (matchedCity) {
+            hotels = MOCK_HOTELS.filter(h =>
+                h.city.toLowerCase() === matchedCity.name.toLowerCase()
+            );
+        } else if (isNYC) {
+            hotels = MOCK_HOTELS.filter(h => h.city === "New York");
+        } else {
+            // No match found in suggestions or NYC - return empty array to trigger "Not Found" UI
+            hotels = [];
+        }
+    } else {
+        // For pagination, only generate if we had a match or NYC
+        if (matchedCity || isNYC) {
+            const baseLat = matchedCity ? matchedCity.lat : 40.75;
+            const baseLng = matchedCity ? matchedCity.lng : -73.98;
+
+            hotels = generateMoreHotels(
+                page,
+                matchedCity?.name || "New York",
+                matchedCity?.country || "United States",
+                baseLat,
+                baseLng
+            );
+        } else {
+            hotels = [];
+        }
+    }
+
+    // --- Dynamic transformation (Optional cleanup) ---
+    // Since we now only return hotels for matched cities or NYC, the "shouldTransform" logic
+    // is mostly redundant but we keep it for extra safety when using generated hotels.
+    const shouldTransform = !isNYC && hotels.some(h => h.city === "New York" || h.city === "New York City");
+
+    // Calculate nights for price calculation realism
+    const checkIn = new Date(check_in_date);
+    const checkOut = new Date(check_out_date);
+    const diffTime = Math.abs(checkOut.getTime() - checkIn.getTime());
+    const nights = Math.max(1, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+
+    if (shouldTransform && matchedCity) {
+        hotels = JSON.parse(JSON.stringify(hotels)).map((h: Hotel) => {
+            if (h.city === "New York" || h.city === "New York City") {
+                const totalPriceExtracted = h.price_per_night.extracted_price * nights;
+                const totalPriceBeforeTaxesExtracted = h.price_per_night.extracted_price_before_taxes * nights;
+
+                return {
+                    ...h,
+                    city: matchedCity.name,
+                    country: matchedCity.country,
+                    name: h.name.includes("New York") ? h.name.replace("New York", matchedCity.name) : `${h.name} ${matchedCity.name}`,
+                    gps_coordinates: {
+                        latitude: matchedCity.lat + (Math.random() - 0.5) * 0.05,
+                        longitude: matchedCity.lng + (Math.random() - 0.5) * 0.05,
+                    },
+                    total_price: {
+                        price: `$${totalPriceExtracted}`,
+                        extracted_price: totalPriceExtracted,
+                        price_before_taxes: `$${totalPriceBeforeTaxesExtracted}`,
+                        extracted_price_before_taxes: totalPriceBeforeTaxesExtracted
+                    }
+                };
+            }
+            return h;
+        });
+    } else if (shouldTransform && !matchedCity) {
+        // Fallback for completely unknown cities
+        const guessCity = q.split(",")[0];
+        hotels = JSON.parse(JSON.stringify(hotels)).map((h: Hotel) => {
+            if (h.city === "New York" || h.city === "New York City") {
+                const totalPriceExtracted = h.price_per_night.extracted_price * nights;
+                const totalPriceBeforeTaxesExtracted = h.price_per_night.extracted_price_before_taxes * nights;
+
+                return {
+                    ...h,
+                    city: guessCity,
+                    name: h.name.replace("New York", guessCity),
+                    gps_coordinates: {
+                        latitude: 30 + (Math.random() - 0.5) * 2, // Totally random guess
+                        longitude: 30 + (Math.random() - 0.5) * 2,
+                    },
+                    total_price: {
+                        price: `$${totalPriceExtracted}`,
+                        extracted_price: totalPriceExtracted,
+                        price_before_taxes: `$${totalPriceBeforeTaxesExtracted}`,
+                        extracted_price_before_taxes: totalPriceBeforeTaxesExtracted
+                    }
+                };
+            }
+            return h;
+        });
+    } else {
+        // Even if not transforming, update total price based on nights for matched hotels
+        hotels = JSON.parse(JSON.stringify(hotels)).map((h: Hotel) => {
+            const totalPriceExtracted = h.price_per_night.extracted_price * nights;
+            const totalPriceBeforeTaxesExtracted = h.price_per_night.extracted_price_before_taxes * nights;
+            return {
+                ...h,
+                total_price: {
+                    price: `$${totalPriceExtracted}`,
+                    extracted_price: totalPriceExtracted,
+                    price_before_taxes: `$${totalPriceBeforeTaxesExtracted}`,
+                    extracted_price_before_taxes: totalPriceBeforeTaxesExtracted
+                }
+            };
+        });
+    }
 
     if (boundsStr) {
         const parts = boundsStr.split(",").map(Number);
         if (parts.length === 4) {
             const [north, south, east, west] = parts;
-            hotels = hotels.filter((h) => {
+            const filteredHotels = hotels.filter((h) => {
                 const { latitude, longitude } = h.gps_coordinates;
                 return latitude <= north && latitude >= south && longitude <= east && longitude >= west;
             });
+
+            // Fallback: If bounds filtering results in 0 hotels but we had hotels for the query,
+            // ignore bounds so the user at least sees results for their destination.
+            if (filteredHotels.length > 0) {
+                hotels = filteredHotels;
+            } else if (hotels.length > 0) {
+                console.log("Bounds filtered out all query results, falling back to query-only results.");
+            }
         }
     }
 
-    const totalResults = 14542;
+    const totalResults = !isNYC ? hotels.length + Math.floor(Math.random() * 50) : 14542;
     const recordsFrom = (page - 1) * PAGE_SIZE + 1;
     const recordsTo = recordsFrom + hotels.length - 1;
 
