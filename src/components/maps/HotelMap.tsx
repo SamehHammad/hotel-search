@@ -8,7 +8,10 @@ import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
 import { useHotels } from "@/hooks/useHotels";
 import { useMapBounds } from "@/hooks/useMapBounds";
-import { GOOGLE_MAPS_API_KEY, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from "@/lib/constants";
+import {
+    GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_MAP_ID,
+    MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM
+} from "@/lib/constants";
 import { MapPin, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -41,7 +44,7 @@ export function HotelMap() {
                 const map = new coreLibrary.Map(mapRef.current!, {
                     center: MAP_DEFAULT_CENTER,
                     zoom: MAP_DEFAULT_ZOOM,
-                    mapId: "4b97143a4192b005", // Better to use a valid map ID for AdvancedMarkers
+                    mapId: GOOGLE_MAPS_MAP_ID,
                     mapTypeControl: false,
                     streetViewControl: false,
                     fullscreenControl: false,

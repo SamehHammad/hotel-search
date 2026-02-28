@@ -1,6 +1,6 @@
 import { SearchFilters } from "@/types/search.types";
 
-export const BEARER_TOKEN = "hotel_secure_token_123";
+export const BEARER_TOKEN = process.env.NEXT_PUBLIC_BEARER_TOKEN ?? "hotel_secure_token_123";
 
 export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
     q: "New York",
@@ -14,6 +14,9 @@ export const PAGE_SIZE = 20;
 
 export const GOOGLE_MAPS_API_KEY =
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
+
+export const GOOGLE_MAPS_MAP_ID =
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_KEY ?? "4b97143a4192b005";
 
 export const LOCALES = ["en", "ar"] as const;
 
