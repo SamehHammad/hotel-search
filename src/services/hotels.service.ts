@@ -21,6 +21,13 @@ export async function fetchHotels(
             children: filters.guests.children,
             page: filters.page,
             bounds: boundsParam,
+            min_price: filters.min_price,
+            max_price: filters.max_price,
+            rating: filters.rating,
+            amenities: filters.amenities?.join(","),
+            hotel_stars: filters.hotel_stars?.join(","),
+            sort_by: filters.sort_by,
+            property_name: filters.property_name,
         },
     });
 }

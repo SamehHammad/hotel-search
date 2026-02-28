@@ -12,11 +12,17 @@ export interface GuestsConfig {
     children: number;
 }
 
+export interface RoomConfig {
+    adults: number;
+    children: number;
+}
+
 export interface SearchFilters {
     q: string;
     check_in_date?: string;
     check_out_date?: string;
     guests: GuestsConfig;
+    rooms: RoomConfig[];
     page: number;
     bounds?: Bounds | null;
     min_price?: number;
@@ -32,6 +38,5 @@ export interface SearchFormValues {
     location: string;
     checkIn: string;
     checkOut: string;
-    adults: number;
-    children: number;
+    rooms: RoomConfig[];
 }

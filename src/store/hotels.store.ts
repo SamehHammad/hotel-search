@@ -40,23 +40,40 @@ const useHotelsStore = create<HotelsState>((set, get) => ({
     isFetchingMore: false,
 
     setFilters: (newFilters) => {
-        const currentQ = get().filters.q;
-        const currentGuests = get().filters.guests;
+        const state = get();
+        const currentQ = state.filters.q;
+        const currentGuests = state.filters.guests;
+        const currentRooms = state.filters.rooms;
 
         const isMajorChange =
             (newFilters.q !== undefined && newFilters.q !== currentQ) ||
             (newFilters.guests !== undefined &&
                 (newFilters.guests.adults !== currentGuests.adults ||
-                    newFilters.guests.children !== currentGuests.children));
+                    newFilters.guests.children !== currentGuests.children)) ||
+            (newFilters.rooms !== undefined &&
+                JSON.stringify(newFilters.rooms) !== JSON.stringify(currentRooms)) ||
+            newFilters.min_price !== undefined ||
+            newFilters.max_price !== undefined ||
+            newFilters.hotel_stars !== undefined ||
+            newFilters.amenities !== undefined ||
+            newFilters.property_name !== undefined;
 
-        set((state) => ({
-            filters: { ...state.filters, ...newFilters, page: 1 },
-            // Only clear results and bounds if it's a major change (new search)
-            // If it's just a bounds change or similar, we keep current hotels to avoid flicker
-            hotels: isMajorChange ? [] : state.hotels,
-            pagination: isMajorChange ? DEFAULT_PAGINATION : state.pagination,
-            mapBounds: isMajorChange ? null : state.mapBounds,
-        }));
+        set((state) => {
+            const nextFilters = { ...state.filters, ...newFilters, page: 1 };
+
+            // If query or guests/rooms change, we MUST clear bounds to allow a fresh search
+            if (isMajorChange) {
+                nextFilters.bounds = undefined;
+            }
+
+            return {
+                filters: nextFilters,
+                hotels: isMajorChange ? [] : state.hotels,
+                pagination: isMajorChange ? DEFAULT_PAGINATION : state.pagination,
+                mapBounds: isMajorChange ? null : state.mapBounds,
+                loading: isMajorChange ? false : state.loading,
+            };
+        });
     },
 
 

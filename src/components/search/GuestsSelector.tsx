@@ -1,9 +1,9 @@
-//---** Reusable component for selecting guests count (adults, children) **---//
+//---** Reusable component for selecting guests count per room **---//
 
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Users, Plus, Minus } from "lucide-react";
+import { Plus, Minus, Users, ChevronDown } from "lucide-react";
 import {
     Popover,
     PopoverContent,
@@ -11,120 +11,226 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { RoomConfig } from "@/types/search.types";
+import { useState } from "react";
 
 interface GuestsSelectorProps {
-    adults: number;
-    childrenCount: number;
-    onAdultsChange: (val: number) => void;
-    onChildrenChange: (val: number) => void;
+    rooms: RoomConfig[];
+    onRoomsChange: (rooms: RoomConfig[]) => void;
     variant?: "default" | "minimal";
 }
 
 export function GuestsSelector({
-    adults,
-    childrenCount,
-    onAdultsChange,
-    onChildrenChange,
+    rooms,
+    onRoomsChange,
     variant = "default",
 }: GuestsSelectorProps) {
-    const t = useTranslations("search");
-    const totalGuests = adults + childrenCount;
+    const t = useTranslations("hotels");
+    const ts = useTranslations("search");
+    const [open, setOpen] = useState(false);
+
+    const totalAdults = rooms.reduce((acc, room) => acc + room.adults, 0);
+    const totalChildren = rooms.reduce((acc, room) => acc + room.children, 0);
+    const totalTravellers = totalAdults + totalChildren;
+    const totalRooms = rooms.length;
+
     const isMinimal = variant === "minimal";
+
+    const updateRoom = (index: number, adults: number, children: number) => {
+        const newRooms = [...rooms];
+        newRooms[index] = { adults, children };
+        onRoomsChange(newRooms);
+    };
+
+    const addRoom = () => {
+        if (rooms.length < 8) {
+            onRoomsChange([...rooms, { adults: 1, children: 0 }]);
+        }
+    };
+
+    const removeRoom = (index: number) => {
+        if (rooms.length > 1) {
+            const newRooms = rooms.filter((_, i) => i !== index);
+            onRoomsChange(newRooms);
+        }
+    };
 
     return (
         <div className={cn("flex flex-col gap-1.5 w-full", !isMinimal && "flex-1 sm:min-w-[160px]")}>
             {!isMinimal && (
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ps-1">
-                    {t("guestsLabel")}
+                    {ts("guestsLabel")}
                 </label>
             )}
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
                         variant={isMinimal ? "ghost" : "outline"}
                         className={cn(
+                            "flex items-center w-full transition-all duration-200",
                             isMinimal
-                                ? "h-auto p-0 hover:bg-transparent font-bold text-slate-600 text-[15px] justify-start shadow-none"
-                                : "w-full justify-start text-start font-bold h-12 bg-white rounded-xl shadow-sm border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-sm"
+                                ? "h-auto p-0 hover:bg-transparent justify-start gap-4 active:scale-[0.98]"
+                                : "justify-between font-bold h-12 bg-white rounded-xl shadow-sm border-slate-200 hover:border-primary/50 hover:bg-primary/5 text-sm"
                         )}
                     >
-                        {!isMinimal && <Users className="mr-2 h-4 w-4 shrink-0 text-primary" />}
-                        {totalGuests} {t("guestsLabel")}
+                        <div className="flex items-center gap-3 overflow-hidden">
+                            <div className={cn(
+                                "flex items-center justify-center rounded-xl transition-colors",
+                                isMinimal ? "w-10 h-10 bg-slate-100 text-slate-600" : "text-primary"
+                            )}>
+                                <Users className={isMinimal ? "w-5 h-5" : "w-4 h-4"} />
+                            </div>
+
+                            <div className="flex flex-col items-start leading-[1.3] overflow-hidden text-left rtl:text-right">
+                                <span className={cn(
+                                    "font-extrabold tracking-tight whitespace-nowrap",
+                                    isMinimal ? "text-[12px] text-slate-800" : "text-[11px] text-slate-400 uppercase"
+                                )}>
+                                    {isMinimal ? ts("travellers") : ts("guestsLabel")}
+                                </span>
+                                <span className={cn(
+                                    "truncate font-bold tracking-tight whitespace-nowrap",
+                                    isMinimal ? "text-[14px] text-slate-500" : "text-slate-700"
+                                )}>
+                                    {totalTravellers} {totalTravellers > 1 ? ts("travellers") : ts("traveller")}, {totalRooms} {totalRooms > 1 ? t("rooms") : t("room")}
+                                </span>
+                            </div>
+                        </div>
+
+                        {!isMinimal && <ChevronDown className="w-4 h-4 text-slate-400" />}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-80 p-0 rounded-2xl shadow-2xl border-slate-100 overflow-hidden" align="start">
-                    <div className="bg-[#051c34] p-4 text-white">
-                        <p className="text-xs font-bold uppercase opacity-80 tracking-widest">{t("guestsLabel")}</p>
-                        <p className="text-xl font-bold">{totalGuests} {totalGuests > 1 ? t("travellers") : t("traveller")}</p>
+
+                <PopoverContent
+                    className="w-[350px] p-0 rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-slate-100 overflow-hidden bg-white z-[120] flex flex-col max-h-[min(calc(100vh-120px),600px)]"
+                    align="start"
+                    sideOffset={12}
+                >
+                    {/* Header */}
+                    <div className="bg-[#051c34] px-6 py-4 text-white shrink-0">
+                        <h3 className="text-lg font-black tracking-tight flex items-center gap-2">
+                            <Users className="w-5 h-5 text-indigo-300" />
+                            {ts("travellers")}
+                        </h3>
+                        <p className="text-xs font-medium text-indigo-100/70 mt-0.5">
+                            {totalRooms} {totalRooms > 1 ? t("rooms") : t("room")} · {totalTravellers} {ts("travellers")}
+                        </p>
                     </div>
 
+                    {/* Scrollable Content */}
+                    <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent min-h-[150px]">
+                        <div className="divide-y divide-slate-100">
+                            {rooms.map((room, index) => (
+                                <div key={index} className="p-5 space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="font-black text-[#051c34] text-md tracking-tight">
+                                            {t("roomNumber", { number: index + 1 })}
+                                        </h4>
+                                        {rooms.length > 1 && (
+                                            <button
+                                                type="button"
+                                                onClick={() => removeRoom(index)}
+                                                className="text-[#0057ff] text-[12px] font-black hover:underline px-2 py-1 rounded-md hover:bg-blue-50 transition-colors"
+                                            >
+                                                {t("removeRoom")}
+                                            </button>
+                                        )}
+                                    </div>
 
-                    <div className="p-6 flex flex-col gap-6">
-                        {/* Adults */}
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-bold text-slate-800 text-base">{t("adultsLabel")}</p>
-                                <p className="text-xs text-slate-400 font-medium">{t("adultsDesc")}</p>
-                            </div>
+                                    <div className="space-y-4">
+                                        {/* Adults */}
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="font-bold text-slate-800 text-sm tracking-tight">{ts("adultsLabel")}</p>
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{ts("adultsDesc")}</p>
+                                            </div>
 
-                            <div className="flex items-center gap-4">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-10 w-10 rounded-full border-slate-200 hover:border-primary hover:text-primary transition-all shadow-sm"
-                                    onClick={() => onAdultsChange(Math.max(1, adults - 1))}
-                                    disabled={adults <= 1}
-                                >
-                                    <Minus className="h-4 w-4" />
-                                </Button>
-                                <span className="w-4 text-center font-bold text-lg text-slate-800">{adults}</span>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-10 w-10 rounded-full border-slate-200 hover:border-primary hover:text-primary transition-all shadow-sm"
-                                    onClick={() => onAdultsChange(adults + 1)}
-                                >
-                                    <Plus className="h-4 w-4" />
-                                </Button>
-                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-9 w-9 rounded-full border-slate-200 bg-white hover:border-[#0057ff] hover:text-[#0057ff] hover:bg-blue-50 transition-all shadow-sm active:scale-95"
+                                                    onClick={() => updateRoom(index, Math.max(1, room.adults - 1), room.children)}
+                                                    disabled={room.adults <= 1}
+                                                >
+                                                    <Minus className="h-4 w-4" />
+                                                </Button>
+                                                <span className="w-4 text-center font-black text-md text-[#051c34]">{room.adults}</span>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-9 w-9 rounded-full border-slate-200 bg-white hover:border-[#0057ff] hover:text-[#0057ff] hover:bg-blue-50 transition-all shadow-sm active:scale-95"
+                                                    onClick={() => updateRoom(index, room.adults + 1, room.children)}
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        {/* Children */}
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="font-bold text-slate-800 text-sm tracking-tight">{ts("childrenLabel")}</p>
+                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Ages 0 - 17</p>
+                                            </div>
+
+                                            <div className="flex items-center gap-4">
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-9 w-9 rounded-full border-slate-200 bg-white hover:border-[#0057ff] hover:text-[#0057ff] hover:bg-blue-50 transition-all shadow-sm active:scale-95"
+                                                    onClick={() => updateRoom(index, room.adults, Math.max(0, room.children - 1))}
+                                                    disabled={room.children <= 0}
+                                                >
+                                                    <Minus className="h-4 w-4" />
+                                                </Button>
+                                                <span className="w-4 text-center font-black text-md text-[#051c34]">{room.children}</span>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    className="h-9 w-9 rounded-full border-slate-200 bg-white hover:border-[#0057ff] hover:text-[#0057ff] hover:bg-blue-50 transition-all shadow-sm active:scale-95"
+                                                    onClick={() => updateRoom(index, room.adults, room.children + 1)}
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
 
-                        {/* Children */}
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="font-bold text-slate-800 text-base">{t("childrenLabel")}</p>
-                                <p className="text-xs text-slate-400 font-medium">{t("childrenDesc")}</p>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-10 w-10 rounded-full border-slate-200 hover:border-primary hover:text-primary transition-all shadow-sm"
-                                    onClick={() => onChildrenChange(Math.max(0, childrenCount - 1))}
-                                    disabled={childrenCount <= 0}
-                                >
-                                    <Minus className="h-4 w-4" />
-                                </Button>
-                                <span className="w-4 text-center font-bold text-lg text-slate-800">{childrenCount}</span>
-                                <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-10 w-10 rounded-full border-slate-200 hover:border-primary hover:text-primary transition-all shadow-sm"
-                                    onClick={() => onChildrenChange(childrenCount + 1)}
-                                >
-                                    <Plus className="h-4 w-4" />
-                                </Button>
-                            </div>
+                        {/* Add Room Inline */}
+                        <div className="px-5 pb-5 pt-1">
+                            <button
+                                type="button"
+                                onClick={addRoom}
+                                className="text-[#0057ff] text-sm font-black hover:underline flex items-center gap-2 group"
+                            >
+                                <div className="w-6 h-6 rounded-full border-2 border-current flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                                    <Plus className="w-3.5 h-3.5" />
+                                </div>
+                                {t("addAnotherRoom")}
+                            </button>
                         </div>
                     </div>
 
-                    <div className="p-4 border-t border-slate-50 flex justify-end bg-slate-50/50">
-                        <Button className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold px-8 shadow-md">
-                            {t("update")}
+                    {/* Footer */}
+                    <div className="p-5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
+                        <button type="button" className="text-[#0057ff] text-[12px] font-black hover:underline tracking-tight">
+                            {t("book9OrMore")}
+                        </button>
+                        <Button
+                            onClick={() => setOpen(false)}
+                            className="w-full sm:w-auto rounded-full bg-[#051c34] hover:bg-[#0a2f58] text-white font-black px-8 py-4 text-sm tracking-tight shadow-xl transition-all hover:scale-105 active:scale-95"
+                        >
+                            {t("done")}
                         </Button>
                     </div>
-
                 </PopoverContent>
             </Popover>
         </div>

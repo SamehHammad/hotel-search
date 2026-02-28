@@ -16,7 +16,9 @@ import {
     ChevronRight as ChevronRightIcon,
     Waves,
     Moon,
-    ArrowUpRight
+    ArrowUpRight,
+    Car,
+    Coffee
 } from "lucide-react";
 import type { Hotel } from "@/types/hotel.types";
 import {
@@ -25,6 +27,7 @@ import {
     formatReviews,
     buildStarArray,
 } from "@/lib/utils";
+import { sanitizeImageUrl } from "@/lib/imageUtils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -71,7 +74,7 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                     />
 
                     <Image
-                        src={images[activeImage].thumbnail}
+                        src={sanitizeImageUrl(images[activeImage].thumbnail)}
                         alt={hotel.name}
                         fill
                         sizes="(max-width: 768px) 100vw, 350px"
@@ -125,15 +128,44 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                                 <h3 className="text-[20px] font-extrabold text-[#051c34] tracking-tight hover:underline cursor-pointer leading-tight">
                                     {hotel.name}
                                 </h3>
-                                <p className="text-[14px] font-medium text-slate-600">{hotel.city || "Cairo"}</p>
+                                <div className="flex items-center gap-2">
+                                    <p className="text-[14px] font-medium text-slate-600">{hotel.city || "Cairo"}</p>
+                                    <div className="flex items-center gap-0.5 ml-1">
+                                        {Array.from({ length: hotel.extracted_hotel_class || 0 }).map((_, i) => (
+                                            <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         {/* Amenities & Description */}
                         <div className="mt-4 flex flex-col gap-2.5">
-                            <div className="flex items-center gap-2 text-[13px] font-semibold text-slate-600">
-                                <Waves className="w-4 h-4 text-slate-500" />
-                                {t("pool")}
+                            <div className="flex flex-wrap gap-2">
+                                {hotel.amenities?.some(a => a.toLowerCase().includes("pool") || a.includes("مسبح")) && (
+                                    <div className="flex items-center gap-1.5 text-[12px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100/50">
+                                        <Waves className="w-3 h-3" />
+                                        {t("pool")}
+                                    </div>
+                                )}
+                                {hotel.amenities?.some(a => a.toLowerCase().includes("wi") || a.includes("واي فاي")) && (
+                                    <div className="flex items-center gap-1.5 text-[12px] font-bold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100/50">
+                                        <CheckCircle2 className="w-3 h-3" />
+                                        {t("wifi")}
+                                    </div>
+                                )}
+                                {hotel.amenities?.some(a => a.toLowerCase().includes("break") || a.includes("إفطار")) && (
+                                    <div className="flex items-center gap-1.5 text-[12px] font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-100/50">
+                                        <Coffee className="w-3 h-3" />
+                                        {t("breakfast")}
+                                    </div>
+                                )}
+                                {hotel.amenities?.some(a => a.toLowerCase().includes("park") || a.includes("موقف")) && (
+                                    <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-100/50">
+                                        <Car className="w-3 h-3" />
+                                        {t("parking")}
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-1">
@@ -143,7 +175,6 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                                 <p className="text-[13px] font-medium text-slate-500 line-clamp-2 max-w-[90%]">
                                     {hotel.description || t("mockDesc")}
                                 </p>
-
                             </div>
                         </div>
 

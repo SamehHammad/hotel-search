@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "./DatePicker";
 import { GuestsSelector } from "./GuestsSelector";
 import { DEFAULT_SEARCH_FILTERS } from "@/lib/constants";
+import { RoomConfig } from "@/types/search.types";
 import Fuse from "fuse.js";
 import { CITY_SUGGESTIONS } from "@/data/suggestions";
 import { cn } from "@/lib/utils";
@@ -58,10 +59,9 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     const [checkOut, setCheckOut] = useState<Date | undefined>(
         safeDateParse(searchParams.get("check_out_date") || DEFAULT_SEARCH_FILTERS.check_out_date, defaultCheckOut)
     );
-    const [guests, setGuests] = useState({
-        adults: parseInt(searchParams.get("adults") || String(DEFAULT_SEARCH_FILTERS.guests.adults), 10),
-        children: parseInt(searchParams.get("children") || String(DEFAULT_SEARCH_FILTERS.guests.children), 10),
-    });
+    const [rooms, setRooms] = useState<RoomConfig[]>(
+        DEFAULT_SEARCH_FILTERS.rooms || [{ adults: 2, children: 0 }]
+    );
 
     const [suggestions, setSuggestions] = useState<any[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -121,12 +121,16 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
         const checkInStr = isValidDate(checkIn) ? format(checkIn, "yyyy-MM-dd") : (DEFAULT_SEARCH_FILTERS.check_in_date || "");
         const checkOutStr = isValidDate(checkOut) ? format(checkOut, "yyyy-MM-dd") : (DEFAULT_SEARCH_FILTERS.check_out_date || "");
 
+        const totalAdults = rooms.reduce((acc, r) => acc + r.adults, 0);
+        const totalChildren = rooms.reduce((acc, r) => acc + r.children, 0);
+
         const params = new URLSearchParams(searchParams.toString());
         params.set("q", location);
         params.set("check_in_date", checkInStr);
         params.set("check_out_date", checkOutStr);
-        params.set("adults", String(guests.adults));
-        params.set("children", String(guests.children));
+        params.set("adults", String(totalAdults));
+        params.set("children", String(totalChildren));
+        params.set("rooms_count", String(rooms.length));
         params.delete("bounds");
         params.delete("page");
 
@@ -225,19 +229,13 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
 
                 {/* Travellers Box */}
                 <div className={cn(
-                    "flex flex-col gap-1 px-4 py-2 bg-white border border-slate-200 rounded-2xl flex-1 relative min-w-[180px]",
-                    isHeader ? "h-[72px] justify-center" : "h-20 justify-center"
+                    "bg-white border border-slate-200 rounded-2xl flex-1 relative min-w-[210px] transition-all hover:border-primary/30",
+                    isHeader ? "h-[74px] flex items-center px-4" : "h-[80px] flex items-center px-5"
                 )}>
-                    <label className="text-[11px] font-bold text-slate-900 flex items-center gap-2">
-                        <Users className="w-3.5 h-3.5 text-slate-900" />
-                        {t("guestsLabel")}
-                    </label>
                     <GuestsSelector
                         variant="minimal"
-                        adults={guests.adults}
-                        childrenCount={guests.children}
-                        onAdultsChange={(adults) => setGuests((g) => ({ ...g, adults }))}
-                        onChildrenChange={(children) => setGuests((g) => ({ ...g, children }))}
+                        rooms={rooms}
+                        onRoomsChange={setRooms}
                     />
                 </div>
 

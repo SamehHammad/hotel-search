@@ -237,7 +237,16 @@ export function generateMoreHotels(
         reviews: Math.floor(100 + Math.random() * 5000),
         location_rating: Math.round((4.0 + Math.random() * 1.0) * 10) / 10,
         airport_access_rating: Math.round((3.8 + Math.random() * 1.2) * 10) / 10,
-        amenities: ["Free Wi‑Fi", "Air conditioning", "Fitness center", "Restaurant"].slice(0, 2 + (i % 3)),
+        amenities: [
+            "Free Wi-Fi",
+            "Breakfast",
+            "Pool",
+            "Free Parking",
+            "Airport Shuttle",
+            "Fitness center",
+            "Restaurant",
+            "Air conditioning"
+        ].slice(0, 5 + (i % 4)),
         images: [
             {
                 thumbnail: "https://lh3.googleusercontent.com/p/AF1QipNWJQfQecgQ7OdiDozN6xDereE9PGz8PmNwRUbH=s287",

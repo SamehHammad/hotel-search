@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Map as MapIcon, X } from "lucide-react";
 
 export default function HotelsPageClient() {
-    const t = useTranslations("search");
+    const t = useTranslations("hotels");
     const [isMapOpen, setIsMapOpen] = useState(false);
 
     return (
@@ -26,7 +26,7 @@ export default function HotelsPageClient() {
             <Navbar />
 
             {/* Top Header showing Search Form on results page */}
-            <div className="bg-white shadow-sm py-4 border-b border-slate-100 flex-shrink-0 z-40">
+            <div className="bg-white shadow-sm py-4 border-b border-slate-100 shrink-0 z-40">
                 <div className="container mx-auto max-w-[1400px] px-4 md:px-6">
                     <SearchForm variant="header" className="shadow-none border border-slate-100 bg-[#f9fafb] -mb-2" />
                 </div>
