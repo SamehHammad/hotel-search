@@ -127,11 +127,7 @@
         "sortRecommended": "Recommended for you",
         "sortPriceAsc": "Price (low to high)",
         "sortRating": "Guest rating",
-        "sortDescription": "We prioritize properties with high relevance, guest ratings, and verified reviews to help you find the best stay.",
-        "aboutHotel": "About this property",
-        "bookNow": "Book Now",
-        "viewDetails": "View Details",
-        "startingFrom": "Starting from"
+        "sortDescription": "We prioritize properties with high relevance, guest ratings, and verified reviews to help you find the best stay."
     },
     "map": {
         "title": "Map View",

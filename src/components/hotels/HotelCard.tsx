@@ -19,7 +19,6 @@ import useHotelsStore from "@/store/hotels.store";
 import { useShallow } from "zustand/react/shallow";
 import { differenceInCalendarDays, parseISO, format } from "date-fns";
 import { getHotelImages } from "@/data/mockHotels";
-import { HotelDetailsDialog } from "./HotelDetailsDialog";
 
 interface HotelCardProps {
     hotel: Hotel;
@@ -88,9 +87,6 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
     const hasBreakfast = has(["breakfast", "إفطار"]);
     const hasParking = has(["parking", "park", "موقف"]);
     const stars = hotel.extracted_hotel_class ?? 0;
-
-    //---** State to manage the detailed hotel information dialog **---//
-    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
     return (
         /*---** Card shell: flex row on desktop, column on mobile **---*/
@@ -259,38 +255,11 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                                 </span>
                             </div>
 
-                            {/*---** Details CTA button triggers full info dialog **---*/}
-                            <button
-                                onClick={() => setIsDetailsOpen(true)}
-                                className="
-                                    mt-2 w-full rounded-lg bg-[#051c34] hover:bg-[#0a2f58]
-                                    text-white text-[12px] font-bold py-1.5 px-3
-                                    transition-all hover:scale-[1.02] active:scale-[0.98]
-                                    shadow-sm uppercase
-                                "
-                            >
-                                {t("viewDetails") || "View Details"}
-                            </button>
+                            {/*---** Button removed per user request **---*/}
                         </div>
                     </div>
                 </div>
             </article>
-
-            {/*---** Detailed hotel information popup **---*/}
-            <HotelDetailsDialog
-                hotel={hotel}
-                isOpen={isDetailsOpen}
-                onClose={() => setIsDetailsOpen(false)}
-                searchInfo={{
-                    checkInLabel,
-                    checkOutLabel,
-                    nights,
-                    totalTravellers,
-                    roomsCount,
-                    nightlyDisplay,
-                    totalDisplay
-                }}
-            />
         </>
     );
 });
