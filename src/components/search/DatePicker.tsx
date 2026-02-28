@@ -20,9 +20,10 @@ interface DatePickerProps {
     onSelect: (date: Date | undefined) => void;
     label: string;
     minDate?: Date;
+    variant?: "default" | "minimal";
 }
 
-export function DatePicker({ date, onSelect, label, minDate }: DatePickerProps) {
+export function DatePicker({ date, onSelect, label, minDate, variant = "default" }: DatePickerProps) {
     const t = useTranslations("search");
     const [isMobile, setIsMobile] = React.useState(false);
 
@@ -33,29 +34,39 @@ export function DatePicker({ date, onSelect, label, minDate }: DatePickerProps) 
         return () => window.removeEventListener("resize", checkMobile);
     }, []);
 
+    // Safety check for valid Date objects to avoid "Invalid time value" RangeError in format()
+    const isValidDate = (d: any): d is Date => d instanceof Date && !isNaN(d.getTime());
+
+    const isMinimal = variant === "minimal";
+
     return (
-        <div className="flex flex-col gap-1.5 flex-1 w-full sm:min-w-[160px]">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ps-1">
-                {label}
-            </label>
+        <div className={cn("flex flex-col gap-1.5 w-full", !isMinimal && "flex-1 sm:min-w-[160px]")}>
+            {!isMinimal && (
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ps-1">
+                    {label}
+                </label>
+            )}
             <Popover>
                 <PopoverTrigger asChild>
                     <Button
-                        variant={"outline"}
+                        variant={isMinimal ? "ghost" : "outline"}
                         className={cn(
-                            "w-full justify-start text-start font-bold h-12 bg-white rounded-xl shadow-sm border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-sm",
-                            !date && "text-slate-400 font-medium"
+                            isMinimal
+                                ? "h-auto p-0 hover:bg-transparent font-bold text-slate-600 text-[15px] justify-start"
+                                : "w-full justify-start text-start font-bold h-12 bg-white rounded-xl shadow-sm border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-sm",
+                            !isValidDate(date) && "text-slate-400 font-medium"
                         )}
                     >
-                        <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-primary" />
-                        {date ? format(date, "MMM dd, yyyy") : <span>{label}</span>}
+                        {!isMinimal && <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-primary" />}
+                        {isValidDate(date) ? format(date, "MMM dd") : <span>{label}</span>}
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-slate-100 overflow-hidden" align="start">
-                    <div className="bg-primary p-4 text-white">
+                    <div className="bg-[#051c34] p-4 text-white">
                         <p className="text-xs font-bold uppercase opacity-80 tracking-widest">{label}</p>
-                        <p className="text-xl font-bold">{date ? format(date, "EEEE, MMM dd") : "Select a date"}</p>
+                        <p className="text-xl font-bold">{isValidDate(date) ? format(date, "EEEE, MMM dd") : t("selectDate")}</p>
                     </div>
+
                     <Calendar
                         mode="single"
                         selected={date}
@@ -76,9 +87,10 @@ export function DatePicker({ date, onSelect, label, minDate }: DatePickerProps) 
                     />
                     <div className="p-3 border-t border-slate-50 flex justify-end">
                         <Button variant="ghost" size="sm" className="text-primary font-bold hover:bg-primary/5 rounded-lg" onClick={() => onSelect(undefined)}>
-                            Clear
+                            {t("clear")}
                         </Button>
                     </div>
+
                 </PopoverContent>
             </Popover>
         </div>

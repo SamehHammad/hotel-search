@@ -10,12 +10,14 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface GuestsSelectorProps {
     adults: number;
     childrenCount: number;
     onAdultsChange: (val: number) => void;
     onChildrenChange: (val: number) => void;
+    variant?: "default" | "minimal";
 }
 
 export function GuestsSelector({
@@ -23,38 +25,48 @@ export function GuestsSelector({
     childrenCount,
     onAdultsChange,
     onChildrenChange,
+    variant = "default",
 }: GuestsSelectorProps) {
     const t = useTranslations("search");
     const totalGuests = adults + childrenCount;
+    const isMinimal = variant === "minimal";
 
     return (
-        <div className="flex flex-col gap-1.5 flex-1 w-full sm:min-w-[160px]">
-            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ps-1">
-                {t("guestsLabel")}
-            </label>
+        <div className={cn("flex flex-col gap-1.5 w-full", !isMinimal && "flex-1 sm:min-w-[160px]")}>
+            {!isMinimal && (
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ps-1">
+                    {t("guestsLabel")}
+                </label>
+            )}
             <Popover>
                 <PopoverTrigger asChild>
                     <Button
-                        variant="outline"
-                        className="w-full justify-start text-start font-bold h-12 bg-white rounded-xl shadow-sm border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-sm"
+                        variant={isMinimal ? "ghost" : "outline"}
+                        className={cn(
+                            isMinimal
+                                ? "h-auto p-0 hover:bg-transparent font-bold text-slate-600 text-[15px] justify-start shadow-none"
+                                : "w-full justify-start text-start font-bold h-12 bg-white rounded-xl shadow-sm border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-sm"
+                        )}
                     >
-                        <Users className="mr-2 h-4 w-4 shrink-0 text-primary" />
+                        {!isMinimal && <Users className="mr-2 h-4 w-4 shrink-0 text-primary" />}
                         {totalGuests} {t("guestsLabel")}
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-80 p-0 rounded-2xl shadow-2xl border-slate-100 overflow-hidden" align="start">
-                    <div className="bg-primary p-4 text-white">
+                    <div className="bg-[#051c34] p-4 text-white">
                         <p className="text-xs font-bold uppercase opacity-80 tracking-widest">{t("guestsLabel")}</p>
-                        <p className="text-xl font-bold">{totalGuests} Travel{totalGuests > 1 ? "ers" : "er"}</p>
+                        <p className="text-xl font-bold">{totalGuests} {totalGuests > 1 ? t("travellers") : t("traveller")}</p>
                     </div>
+
 
                     <div className="p-6 flex flex-col gap-6">
                         {/* Adults */}
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="font-bold text-slate-800 text-base">{t("adultsLabel")}</p>
-                                <p className="text-xs text-slate-400 font-medium">Ages 13 or above</p>
+                                <p className="text-xs text-slate-400 font-medium">{t("adultsDesc")}</p>
                             </div>
+
                             <div className="flex items-center gap-4">
                                 <Button
                                     variant="outline"
@@ -81,8 +93,9 @@ export function GuestsSelector({
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="font-bold text-slate-800 text-base">{t("childrenLabel")}</p>
-                                <p className="text-xs text-slate-400 font-medium">Ages 2 – 12</p>
+                                <p className="text-xs text-slate-400 font-medium">{t("childrenDesc")}</p>
                             </div>
+
                             <div className="flex items-center gap-4">
                                 <Button
                                     variant="outline"
@@ -108,9 +121,10 @@ export function GuestsSelector({
 
                     <div className="p-4 border-t border-slate-50 flex justify-end bg-slate-50/50">
                         <Button className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold px-8 shadow-md">
-                            Update
+                            {t("update")}
                         </Button>
                     </div>
+
                 </PopoverContent>
             </Popover>
         </div>

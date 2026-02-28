@@ -13,7 +13,9 @@ import {
     Sparkles,
     SlidersHorizontal,
     ChevronDown,
-    Map
+    Map,
+    Calendar,
+    Users
 } from "lucide-react";
 import useHotelsStore from "@/store/hotels.store";
 import { Input } from "@/components/ui/input";
@@ -36,13 +38,25 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
+    // Helper to safely parse date strings from URL or constants
+    const safeDateParse = (dateStr: string | null | undefined, fallback: Date) => {
+        if (!dateStr) return fallback;
+        const d = new Date(dateStr);
+        return isNaN(d.getTime()) ? fallback : d;
+    };
+
+    // Initial dates: search params > default filters > generic today/tomorrow
+    const defaultCheckIn = new Date();
+    const defaultCheckOut = new Date(Date.now() + 86400000);
+
     // Local state for the form, initialized from URL search params
-    const [location, setLocation] = useState(searchParams.get("q") || "Dubai");
+    const [location, setLocation] = useState(searchParams.get("q") || t("defaultCity"));
+
     const [checkIn, setCheckIn] = useState<Date | undefined>(
-        searchParams.get("check_in_date") ? new Date(searchParams.get("check_in_date")!) : new Date(DEFAULT_SEARCH_FILTERS.check_in_date)
+        safeDateParse(searchParams.get("check_in_date") || DEFAULT_SEARCH_FILTERS.check_in_date, defaultCheckIn)
     );
     const [checkOut, setCheckOut] = useState<Date | undefined>(
-        searchParams.get("check_out_date") ? new Date(searchParams.get("check_out_date")!) : new Date(DEFAULT_SEARCH_FILTERS.check_out_date)
+        safeDateParse(searchParams.get("check_out_date") || DEFAULT_SEARCH_FILTERS.check_out_date, defaultCheckOut)
     );
     const [guests, setGuests] = useState({
         adults: parseInt(searchParams.get("adults") || String(DEFAULT_SEARCH_FILTERS.guests.adults), 10),
@@ -101,11 +115,11 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
         e.preventDefault();
         if (!location.trim()) return;
         if (checkIn && checkOut && checkOut <= checkIn) {
-            alert(t("validation.dateOrder"));
             return;
         }
-        const checkInStr = checkIn ? format(checkIn, "yyyy-MM-dd") : DEFAULT_SEARCH_FILTERS.check_in_date;
-        const checkOutStr = checkOut ? format(checkOut, "yyyy-MM-dd") : DEFAULT_SEARCH_FILTERS.check_out_date;
+        const isValidDate = (d: any): d is Date => d instanceof Date && !isNaN(d.getTime());
+        const checkInStr = isValidDate(checkIn) ? format(checkIn, "yyyy-MM-dd") : (DEFAULT_SEARCH_FILTERS.check_in_date || "");
+        const checkOutStr = isValidDate(checkOut) ? format(checkOut, "yyyy-MM-dd") : (DEFAULT_SEARCH_FILTERS.check_out_date || "");
 
         const params = new URLSearchParams(searchParams.toString());
         params.set("q", location);
@@ -121,64 +135,53 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     };
 
     const isHeader = variant === "header";
-    const cityName = location.split(",")[0] || "Dubai";
+    const cityName = location.split(",")[0] || t("defaultCity");
+
 
     return (
         <div className={cn(
             "flex flex-col gap-6 w-full transition-all duration-300",
             !isHeader && "bg-white p-6 sm:p-8 rounded-[2rem] shadow-2xl border border-slate-100",
-            isHeader && "bg-slate-50/80 backdrop-blur-sm p-4 rounded-3xl border border-slate-200",
+            isHeader && "bg-white p-0",
             className
         )}>
             {/* Header Variant Dynamic Title */}
             {isHeader && (
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                        Explore <span className="text-primary">{cityName}</span>
+                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#051c34] tracking-tight">
+                        {t("explore")} <span className="text-primary">{cityName}</span>
                     </h1>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" className="rounded-full border-slate-200 h-10 px-6 font-bold text-slate-700 bg-white">
-                            <Map className="w-4 h-4 me-2 text-primary" />
-                            Show Map
-                        </Button>
-                    </div>
+
                 </div>
             )}
 
             {/* Main Search Logic Container */}
-            <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row items-stretch lg:items-end gap-4 w-full">
-                {/* Destination Block */}
-                <div className="flex flex-col gap-1.5 flex-[1.5] w-full min-w-[240px]">
-                    <label htmlFor="location" className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ps-1">
+            <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full">
+                {/* Where to? Box */}
+                <div className={cn(
+                    "flex flex-col gap-1 px-4 py-2 bg-white border border-slate-200 rounded-2xl flex-[1.5] relative min-w-[200px]",
+                    isHeader ? "h-[72px] justify-center" : "h-20 justify-center"
+                )}>
+                    <label className="text-[11px] font-bold text-slate-900 flex items-center gap-2">
+                        <MapPin className="w-3.5 h-3.5 text-slate-900" />
                         {t("locationLabel")}
                     </label>
-                    <div className="relative" ref={suggestionsRef}>
-                        <MapPin className="absolute start-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary" />
+                    <div className="relative w-full" ref={suggestionsRef}>
                         <Input
-                            id="location"
                             value={location}
                             onChange={(e) => handleLocationChange(e.target.value)}
                             onFocus={() => location.length >= 2 && setShowSuggestions(true)}
                             placeholder={t("locationPlaceholder")}
-                            className="ps-11 h-14 bg-white rounded-2xl shadow-sm border-slate-200 focus-visible:ring-primary w-full font-bold text-slate-700 text-base"
+                            className="h-8 p-0 border-none shadow-none focus-visible:ring-0 font-bold text-slate-600 text-[15px] placeholder:text-slate-400 placeholder:font-normal"
                             required
                             autoComplete="off"
                         />
-                        {/* Enhanced Suggestions Menu */}
                         {showSuggestions && (
-                            <div className="absolute top-[calc(100%+8px)] start-0 end-0 bg-white rounded-[1.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 py-3 z-[110] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-400">
-                                {bestMatch && location.toLowerCase() !== bestMatch.name.toLowerCase() && (
-                                    <div className="px-5 py-3 mb-2 border-b border-slate-50 bg-primary/5">
-                                        <button type="button" onClick={() => handleSelectSuggestion(bestMatch)} className="flex items-center gap-3 text-primary text-sm font-bold hover:underline">
-                                            <Sparkles className="w-4 h-4" />
-                                            <span>Suggested: {bestMatch.name}, {bestMatch.country}</span>
-                                        </button>
-                                    </div>
-                                )}
+                            <div className="absolute top-[calc(100%+12px)] start-[-16px] end-[-16px] bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-[110] overflow-hidden">
                                 <div className="max-h-[300px] overflow-y-auto px-2">
                                     {suggestions.map((city) => (
                                         <button key={city.id} type="button" onClick={() => handleSelectSuggestion(city)} className="w-full px-4 py-3 flex items-center gap-4 hover:bg-slate-50 rounded-xl transition-all text-left group">
-                                            <div className="bg-slate-100 p-3 rounded-xl text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                            <div className="bg-slate-100 p-2.5 rounded-xl text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                                 <MapPin className="h-5 w-5" />
                                             </div>
                                             <div>
@@ -193,43 +196,62 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                     </div>
                 </div>
 
-                {/* Date Selection Blocks */}
-                <div className="flex flex-1 items-center gap-4 w-full">
-                    <DatePicker label={t("checkInLabel")} date={checkIn} onSelect={setCheckIn} />
-                    <DatePicker label={t("checkOutLabel")} date={checkOut} onSelect={setCheckOut} minDate={checkIn} />
+                {/* Dates Box */}
+                <div className={cn(
+                    "flex flex-col gap-1 px-4 py-2 bg-white border border-slate-200 rounded-2xl flex-1 relative min-w-[200px]",
+                    isHeader ? "h-[72px] justify-center" : "h-20 justify-center"
+                )}>
+                    <label className="text-[11px] font-bold text-slate-900 flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-slate-900" />
+                        {t("datesLabel")}
+                    </label>
+                    <div className="flex items-center gap-1 w-full">
+                        <DatePicker
+                            date={checkIn}
+                            onSelect={setCheckIn}
+                            variant="minimal"
+                            label={t("checkInLabel")}
+                        />
+                        <span className="text-slate-300">-</span>
+                        <DatePicker
+                            date={checkOut}
+                            onSelect={setCheckOut}
+                            variant="minimal"
+                            minDate={checkIn}
+                            label={t("checkOutLabel")}
+                        />
+                    </div>
                 </div>
 
-                {/* Guests Selection Block */}
-                <GuestsSelector
-                    adults={guests.adults}
-                    childrenCount={guests.children}
-                    onAdultsChange={(adults) => setGuests((g) => ({ ...g, adults }))}
-                    onChildrenChange={(children) => setGuests((g) => ({ ...g, children }))}
-                />
+                {/* Travellers Box */}
+                <div className={cn(
+                    "flex flex-col gap-1 px-4 py-2 bg-white border border-slate-200 rounded-2xl flex-1 relative min-w-[180px]",
+                    isHeader ? "h-[72px] justify-center" : "h-20 justify-center"
+                )}>
+                    <label className="text-[11px] font-bold text-slate-900 flex items-center gap-2">
+                        <Users className="w-3.5 h-3.5 text-slate-900" />
+                        {t("guestsLabel")}
+                    </label>
+                    <GuestsSelector
+                        variant="minimal"
+                        adults={guests.adults}
+                        childrenCount={guests.children}
+                        onAdultsChange={(adults) => setGuests((g) => ({ ...g, adults }))}
+                        onChildrenChange={(children) => setGuests((g) => ({ ...g, children }))}
+                    />
+                </div>
 
-                {/* Modern CTA Button */}
-                <Button type="submit" size="lg" className="h-14 px-10 rounded-2xl font-extrabold text-lg shadow-xl shadow-primary/30 shrink-0 transition-all hover:scale-[1.02] active:scale-95">
-                    <Search className="me-2 h-6 w-6" />
-                    {t("searchButton")}
+                {/* Circle Search Button */}
+                <Button
+                    type="submit"
+                    className={cn(
+                        "rounded-full p-0 flex items-center justify-center bg-[#051c34] hover:bg-[#0a2f58] shadow-xl transition-all hover:scale-105 active:scale-95 shrink-0",
+                        isHeader ? "w-[56px] h-[56px]" : "w-16 h-16"
+                    )}
+                >
+                    <Search className="h-6 w-6 text-white" />
                 </Button>
             </form>
-
-            {/* Header Variant Filter Bar */}
-            {isHeader && (
-                <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar scroll-smooth pt-2 border-t border-slate-200">
-                    <Button variant="outline" className="rounded-full h-10 px-5 shrink-0 font-bold text-slate-700 bg-white border-slate-200 hover:border-primary gap-2">
-                        <SlidersHorizontal className="w-4 h-4" />
-                        Quick Filters
-                    </Button>
-                    <div className="h-5 w-px bg-slate-200 mx-1" />
-                    {["Price Range", "Star Rating", "Amenities", "Property Type"].map((filter) => (
-                        <Button key={filter} variant="outline" className="rounded-full h-10 px-5 shrink-0 font-bold text-slate-600 bg-white border-slate-200 hover:border-primary gap-2 transition-all">
-                            {filter}
-                            <ChevronDown className="w-4 h-4 opacity-40" />
-                        </Button>
-                    ))}
-                </div>
-            )}
         </div>
     );
 }

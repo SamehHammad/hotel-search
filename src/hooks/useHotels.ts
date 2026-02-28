@@ -58,8 +58,8 @@ export function useHotels() {
 
         const adults = parseInt(searchParams.get("adults") || "2", 10);
         const children = parseInt(searchParams.get("children") || "0", 10);
-
         const boundsParam = searchParams.get("bounds");
+
         const bounds = boundsParam ? {
             north: parseFloat(boundsParam.split(",")[0]),
             south: parseFloat(boundsParam.split(",")[1]),
@@ -67,7 +67,21 @@ export function useHotels() {
             west: parseFloat(boundsParam.split(",")[3]),
         } : null;
 
+        // Check if anything actually changed compared to store
+        // This is key to preventing loops from URL <-> Store synchronization
+        const storeFilters = useHotelsStore.getState().filters;
+        const hasQChanged = q !== storeFilters.q;
+        const hasGuestsChanged =
+            adults !== storeFilters.guests.adults ||
+            children !== storeFilters.guests.children;
+        const hasBoundsChanged = JSON.stringify(bounds) !== JSON.stringify(storeFilters.bounds);
+
+        if (!hasQChanged && !hasGuestsChanged && !hasBoundsChanged) {
+            return;
+        }
+
         // Sync local bounds to store so map doesn't re-trigger fitBounds
+        // if we are loading with bounds from the URL initially
         if (bounds && !mapBounds) {
             useHotelsStore.getState().setBounds(bounds);
         }
@@ -83,6 +97,7 @@ export function useHotels() {
         fetchHotels();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams]);
+
 
     return {
         hotels,

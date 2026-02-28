@@ -15,7 +15,8 @@ import {
     X,
     Globe,
     UserCircle,
-    ChevronDown
+    ChevronDown,
+    Heart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import useWishlistStore from "@/store/wishlist.store";
 
 export function Navbar() {
     const t = useTranslations("nav");
@@ -34,6 +36,9 @@ export function Navbar() {
     const router = useRouter();
     const [isScrolled, setIsScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const { wishlist } = useWishlistStore();
+    const wishlistCount = wishlist.length;
 
     // RTL detection
     const isRtl = locale === "ar";
@@ -104,7 +109,7 @@ export function Navbar() {
                 </div>
 
                 {/* Right Actions Section */}
-                <div className="flex items-center gap-2 sm:gap-4">
+                <div className="flex items-center gap-2 sm:gap-3">
 
                     {/* Language Switcher */}
                     <DropdownMenu>
@@ -131,14 +136,25 @@ export function Navbar() {
                         </DropdownMenuContent>
                     </DropdownMenu>
 
+                    {/* Wishlist Heart */}
+                    <Button variant="ghost" size="icon" className="group rounded-full text-slate-600 hover:text-primary relative">
+                        <Heart className={cn("w-6 h-6 transition-all", wishlistCount > 0 ? "fill-red-500 text-red-500" : "")} />
+                        {wishlistCount > 0 && (
+                            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white px-1">
+                                {wishlistCount}
+                            </span>
+                        )}
+                    </Button>
+
                     {/* Profile & Auth */}
                     <Button variant="ghost" size="icon" className="rounded-full text-slate-600 hover:text-primary">
                         <UserCircle className="w-6 h-6" />
                     </Button>
 
                     <Button className="hidden sm:flex rounded-full font-bold px-6 shadow-md shadow-primary/10">
-                        Login
+                        {t("login")}
                     </Button>
+
 
                     {/* Mobile Menu Toggle */}
                     <Button
@@ -182,8 +198,9 @@ export function Navbar() {
                                 {locale === "en" ? "العربية" : "English"}
                             </Button>
                             <Button className="rounded-xl font-bold">
-                                Login
+                                {t("login")}
                             </Button>
+
                         </div>
                     </nav>
                 </div>

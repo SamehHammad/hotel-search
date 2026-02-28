@@ -14,11 +14,18 @@ export interface GuestsConfig {
 
 export interface SearchFilters {
     q: string;
-    check_in_date: string;
-    check_out_date: string;
+    check_in_date?: string;
+    check_out_date?: string;
     guests: GuestsConfig;
     page: number;
     bounds?: Bounds | null;
+    min_price?: number;
+    max_price?: number;
+    rating?: number;
+    amenities?: string[];
+    hotel_stars?: number[];
+    sort_by?: string;
+    property_name?: string;
 }
 
 export interface SearchFormValues {

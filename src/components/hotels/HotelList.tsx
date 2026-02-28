@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { HotelCard } from "./HotelCard";
 import { HotelCardSkeleton } from "./HotelCardSkeleton";
+import { HotelFilterChips } from "./HotelFilterChips";
 import { useHotels } from "@/hooks/useHotels";
 import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { Loader2 } from "lucide-react";
@@ -65,44 +66,43 @@ export function HotelList() {
                     <span className="text-4xl">🏨</span>
                 </div>
                 <h3 className="text-xl font-bold text-slate-800 mb-2">
-                    {hasSearchQuery ? tCommon("noResults") : "Ready to explore?"}
+                    {hasSearchQuery ? tCommon("noResults") : t("readyToExplore")}
                 </h3>
                 <p className="text-slate-500 max-w-sm mb-6">
                     {hasSearchQuery
-                        ? `${t("resultsCount", { count: 0 })}. Try adjusting your search filters or map bounds.`
-                        : "Enter a destination, check-in dates, and guests above to begin finding your perfect stay."
+                        ? t("resultsCount", { count: 0 })
+                        : t("searchPrompt")
                     }
                 </p>
+
             </div>
         );
     }
 
     return (
-        <div className="space-y-6 flex flex-col">
-            <div className="flex justify-between items-center mb-2 px-1">
-                <h2 className="text-lg font-semibold text-slate-800">
-                    {t("resultsCount", { count: pagination.records_to || hotels.length })}
-                </h2>
-            </div>
+        <div className="flex flex-col">
+            <HotelFilterChips />
 
-            {hotels.map((hotel: import("@/types/hotel.types").Hotel, index: number) => (
-                <HotelCard
-                    key={`${hotel.property_token}-${index}`}
-                    hotel={hotel}
-                />
-            ))}
+            <div className="space-y-6">
+                {hotels.map((hotel: import("@/types/hotel.types").Hotel, index: number) => (
+                    <HotelCard
+                        key={`${hotel.property_token}-${index}`}
+                        hotel={hotel}
+                    />
+                ))}
 
-            {/* Infinite Scroll Sentinel */}
-            <div ref={sentinelRef} className="h-10 w-full flex items-center justify-center mt-6 mb-12">
-                {isFetchingMore && (
-                    <div className="flex items-center gap-3 text-indigo-600 font-medium">
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        <span>{t("loadingMore")}</span>
-                    </div>
-                )}
-                {!hasMore && hotels.length > 0 && !loading && (
-                    <p className="text-slate-400 font-medium">{t("noMoreHotels")}</p>
-                )}
+                {/* Infinite Scroll Sentinel */}
+                <div ref={sentinelRef} className="h-10 w-full flex items-center justify-center mt-6 mb-12">
+                    {isFetchingMore && (
+                        <div className="flex items-center gap-3 text-indigo-600 font-medium">
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>{t("loadingMore")}</span>
+                        </div>
+                    )}
+                    {!hasMore && hotels.length > 0 && !loading && (
+                        <p className="text-slate-400 font-medium">{t("noMoreHotels")}</p>
+                    )}
+                </div>
             </div>
         </div>
     );

@@ -5,18 +5,30 @@
 import { memo, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Star, MapPin, Plane, CheckCircle2 } from "lucide-react";
+import {
+    Star,
+    MapPin,
+    CheckCircle2,
+    ChevronLeft,
+    ChevronRight,
+    Heart,
+    Info,
+    ChevronRight as ChevronRightIcon,
+    Waves,
+    Moon,
+    ArrowUpRight
+} from "lucide-react";
 import type { Hotel } from "@/types/hotel.types";
 import {
     cn,
     formatRating,
     formatReviews,
     buildStarArray,
-    getRatingColor,
 } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import useWishlistStore from "@/store/wishlist.store";
 
 interface HotelCardProps {
     hotel: Hotel;
@@ -24,151 +36,160 @@ interface HotelCardProps {
 
 export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
     const t = useTranslations("hotels");
+    const [activeImage, setActiveImage] = useState(0);
+    const { toggleWishlist, isInWishlist } = useWishlistStore();
+    const isWishlisted = isInWishlist(hotel.property_token);
 
-    const [imgSrc, setImgSrc] = useState(
-        hotel.images && hotel.images.length > 0
-            ? hotel.images[0].thumbnail
-            : "/placeholder.jpg"
-    );
+    const images = hotel.images && hotel.images.length > 0
+        ? hotel.images
+        : [{ thumbnail: "/placeholder.jpg" }];
 
-    const stars = hotel.extracted_hotel_class
-        ? buildStarArray(hotel.extracted_hotel_class)
-        : [];
+    const handleNextImage = (e: React.MouseEvent) => {
+        e.preventDefault(); e.stopPropagation();
+        setActiveImage((prev) => (prev + 1) % images.length);
+    };
+
+    const handlePrevImage = (e: React.MouseEvent) => {
+        e.preventDefault(); e.stopPropagation();
+        setActiveImage((prev) => (prev - 1 + images.length) % images.length);
+    };
+
+    const handleWishlist = (e: React.MouseEvent) => {
+        e.preventDefault(); e.stopPropagation();
+        toggleWishlist(hotel.property_token);
+    };
 
     return (
-        <Card className="hotel-card overflow-hidden border-slate-200 shadow-sm hover:shadow-md transition-all rounded-2xl bg-white mb-4">
-            <div className="flex flex-col sm:flex-row h-full">
+        <Card className="group flex flex-col overflow-hidden border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[12px] bg-white mb-6 border h-auto">
+            <div className="flex flex-col md:flex-row h-auto md:h-[260px]">
                 {/* Image Section */}
-                <div className="relative w-full sm:w-72 h-48 sm:h-auto shrink-0 group">
+                <div className="relative w-full md:w-[320px] lg:w-[350px] shrink-0 overflow-hidden bg-slate-100">
+                    {/* Placeholder Background */}
+                    <div
+                        className="absolute inset-0 z-0 bg-cover bg-center opacity-40"
+                        style={{ backgroundImage: 'url(/placeholder.jpg)' }}
+                    />
+
                     <Image
-                        src={imgSrc}
+                        src={images[activeImage].thumbnail}
                         alt={hotel.name}
                         fill
-                        sizes="(max-width: 640px) 100vw, 288px"
-                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 768px) 100vw, 350px"
+                        className="object-cover transition-transform duration-700 relative z-10"
                         loading="lazy"
-                        onError={() => setImgSrc("/placeholder.jpg")}
                     />
-                    {hotel.deal && (
-                        <Badge className="absolute top-3 right-3 deal-badge shadow-sm z-10 border-none px-3 py-1 bg-amber-500 hover:bg-amber-600">
-                            {hotel.deal_description || t("deal")}: {hotel.deal}
-                        </Badge>
-                    )}
-                    {hotel.eco_certified && (
-                        <Badge className="absolute top-3 left-3 bg-white/90 text-emerald-600 hover:bg-white border-emerald-100 shadow-sm backdrop-blur-sm z-10 gap-1.5 px-2.5 py-1">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            {t("ecoCertified")}
-                        </Badge>
-                    )}
+
+
+                    {/* Wishlist Icon */}
+                    <button
+                        onClick={handleWishlist}
+                        className="absolute top-3 right-3 bg-white hover:bg-white/95 text-slate-800 p-2 rounded-full shadow-md z-10 transition-all hover:scale-110 active:scale-95"
+                    >
+                        <Heart className={cn("w-5 h-5 transition-colors", isWishlisted ? "fill-red-500 text-red-500" : "fill-none text-slate-400")} />
+                    </button>
+
+                    {/* Navigation Overlays */}
+                    <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 px-2 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-none">
+                        <Button
+                            variant="secondary"
+                            size="icon"
+                            className="w-8 h-8 rounded-full bg-white/90 text-slate-900 pointer-events-auto shadow-md border-none"
+                            onClick={handlePrevImage}
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="icon"
+                            className="w-8 h-8 rounded-full bg-white/90 text-slate-900 pointer-events-auto shadow-md border-none"
+                            onClick={handleNextImage}
+                        >
+                            <ChevronRight className="w-5 h-5" />
+                        </Button>
+                    </div>
+
+                    {/* Ad Badge */}
+                    <div className="absolute bottom-3 left-3 z-10">
+                        <div className="bg-white/95 text-slate-700 text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                            {t("ad")}
+                        </div>
+
+                    </div>
                 </div>
 
                 {/* Content Section */}
                 <CardContent className="flex-1 p-5 flex flex-col justify-between">
-                    <div className="flex flex-col gap-2">
-                        <div className="flex justify-between items-start gap-4">
-                            <div>
-                                <h3 className="text-xl font-bold text-slate-900 leading-tight line-clamp-2">
+                    <div>
+                        <div className="flex justify-between items-start gap-3">
+                            <div className="space-y-0.5">
+                                <h3 className="text-[20px] font-extrabold text-[#051c34] tracking-tight hover:underline cursor-pointer leading-tight">
                                     {hotel.name}
                                 </h3>
-                                <div className="flex items-center gap-2 mt-1.5 text-slate-500 text-sm">
-                                    {stars.length > 0 && (
-                                        <div className="flex" aria-label={`${stars.length} star hotel`}>
-                                            {stars.map((s, i) => (
-                                                <Star
-                                                    key={i}
-                                                    className="w-3.5 h-3.5 text-amber-400 fill-amber-400"
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-                                    {hotel.hotel_class && (
-                                        <>
-                                            <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                                            <span>{hotel.hotel_class}</span>
-                                        </>
-                                    )}
-                                </div>
+                                <p className="text-[14px] font-medium text-slate-600">{hotel.city || "Cairo"}</p>
                             </div>
-
-                            {/* Rating Block */}
-                            {hotel.rating && (
-                                <div className="flex flex-col items-end shrink-0">
-                                    <div className="rating-badge flex items-center gap-1.5 shadow-sm">
-                                        <span className="text-lg leading-none">{formatRating(hotel.rating)}</span>
-                                    </div>
-                                    <span className="text-xs text-slate-500 mt-1 font-medium">
-                                        {hotel.reviews ? formatReviews(hotel.reviews) : 0} {t("reviews")}
-                                    </span>
-                                </div>
-                            )}
                         </div>
 
-                        {/* Location & Proximity */}
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-600 mt-1">
-                            <div className="flex items-center gap-1.5 whitespace-nowrap">
-                                <MapPin className="w-4 h-4 text-indigo-400" />
-                                <span className="font-medium text-slate-700">{hotel.city || "New York"}</span>
+                        {/* Amenities & Description */}
+                        <div className="mt-4 flex flex-col gap-2.5">
+                            <div className="flex items-center gap-2 text-[13px] font-semibold text-slate-600">
+                                <Waves className="w-4 h-4 text-slate-500" />
+                                {t("pool")}
                             </div>
 
-                            {hotel.location_rating && (
-                                <div className="flex items-center gap-1.5 whitespace-nowrap">
-                                    <span className={cn("font-medium", getRatingColor(hotel.location_rating))}>
-                                        {formatRating(hotel.location_rating)}
-                                    </span>
-                                    <span className="text-slate-500 text-xs">{t("locationRating")}</span>
-                                </div>
-                            )}
+                            <div className="space-y-1">
+                                <p className="text-[14px] font-extrabold text-[#051c34] leading-tight">
+                                    {hotel.deal || t("mockTitle")}
+                                </p>
+                                <p className="text-[13px] font-medium text-slate-500 line-clamp-2 max-w-[90%]">
+                                    {hotel.description || t("mockDesc")}
+                                </p>
 
-                            {hotel.airport_access_rating && (
-                                <div className="flex items-center gap-1.5 whitespace-nowrap">
-                                    <Plane className="w-3.5 h-3.5 text-slate-400" />
-                                    <span className={cn("font-medium", getRatingColor(hotel.airport_access_rating))}>
-                                        {formatRating(hotel.airport_access_rating)}
-                                    </span>
-                                    <span className="text-slate-500 text-xs">{t("airportRating")}</span>
-                                </div>
-                            )}
+                            </div>
                         </div>
 
-                        {/* Description / Amenities clamp */}
-                        <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-relaxed">
-                            {hotel.description || (hotel.amenities && hotel.amenities.join(" • "))}
-                        </p>
                     </div>
 
-                    <Separator className="my-4 md:my-5 bg-slate-100" />
+                    {/* Bottom Stats & Price row */}
+                    <div className="flex items-end justify-between mt-4">
+                        <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2 text-[12px] font-bold text-slate-700">
+                                <div className="w-5 h-5 bg-[#051c34] text-white flex items-center justify-center rounded-full">
+                                    <Moon className="w-3 h-3 fill-white" />
+                                </div>
+                                {t("collectStamps")}
+                            </div>
 
-                    {/* Pricing Footer */}
-                    <div className="flex justify-between items-end mt-auto pt-1">
-                        <div className="text-xs text-slate-500 max-w-[50%]">
-                            {hotel.amenities && hotel.amenities.length > 0 && (
-                                <div className="flex flex-wrap gap-1">
-                                    {hotel.amenities.slice(0, 3).map((amenity, i) => (
-                                        <Badge key={i} variant="secondary" className="bg-slate-50 text-slate-600 border-slate-200/60 font-medium">
-                                            {amenity}
-                                        </Badge>
-                                    ))}
-                                    {hotel.amenities.length > 3 && (
-                                        <span className="text-slate-400 self-center ml-1">+{hotel.amenities.length - 3}</span>
-                                    )}
+
+                            {hotel.rating && (
+                                <div className="flex items-center gap-2 pt-1">
+                                    <div className="w-9 h-7 bg-[#1e8d35] text-white flex items-center justify-center font-bold text-sm rounded-[6px]">
+                                        {formatRating(hotel.rating)}
+                                    </div>
+                                    <div className="flex flex-col leading-none">
+                                        <span className="text-[13px] font-extrabold text-[#051c34]">{t("excellent")}</span>
+                                        <span className="text-[11px] font-medium text-slate-500 mt-0.5">
+                                            {hotel.reviews ? formatReviews(hotel.reviews) : 0} {t("reviews")}
+                                        </span>
+                                    </div>
+
                                 </div>
                             )}
                         </div>
 
                         <div className="flex flex-col items-end">
-                            <span className="text-xs text-slate-400 line-through mb-0.5">
-                                {hotel.price_per_night.price_before_taxes && hotel.price_per_night.price_before_taxes !== hotel.price_per_night.price
-                                    ? `${hotel.price_per_night.price_before_taxes}`
-                                    : null}
-                            </span>
-                            <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-bold text-slate-900 tracking-tight">
-                                    {hotel.price_per_night.price}
+                            <div className="flex flex-col items-end leading-tight">
+                                <span className="text-[24px] font-extrabold text-[#051c34]">
+                                    {hotel.price_per_night?.price || "$164"}
                                 </span>
-                                <span className="text-sm text-slate-500">{t("pricePerNight")}</span>
-                            </div>
-                            <div className="text-xs text-slate-500 mt-1 font-medium bg-slate-50 px-2 py-0.5 rounded-md">
-                                {hotel.total_price.price} {t("totalPrice")}
+                                <span className="text-[13px] font-bold text-[#051c34]">
+                                    {t("totalPriceWithFees", { amount: hotel.total_price?.price || "$847" })}
+                                </span>
+                                <span className="text-[11px] font-medium text-slate-500 mt-0.5 flex flex-col items-end">
+                                    <span>{t("forRooms", { count: 2 })}</span>
+                                    <span>{t("includesTaxes")}</span>
+                                </span>
+
+
                             </div>
                         </div>
                     </div>

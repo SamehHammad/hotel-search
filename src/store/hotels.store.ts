@@ -39,19 +39,42 @@ const useHotelsStore = create<HotelsState>((set, get) => ({
     mapBounds: null,
     isFetchingMore: false,
 
-    // ---** Set filters and reset to page 1 **---//
     setFilters: (newFilters) => {
+        const currentQ = get().filters.q;
+        const currentGuests = get().filters.guests;
+
+        const isMajorChange =
+            (newFilters.q !== undefined && newFilters.q !== currentQ) ||
+            (newFilters.guests !== undefined &&
+                (newFilters.guests.adults !== currentGuests.adults ||
+                    newFilters.guests.children !== currentGuests.children));
+
         set((state) => ({
             filters: { ...state.filters, ...newFilters, page: 1 },
-            hotels: [],
-            pagination: DEFAULT_PAGINATION,
+            // Only clear results and bounds if it's a major change (new search)
+            // If it's just a bounds change or similar, we keep current hotels to avoid flicker
+            hotels: isMajorChange ? [] : state.hotels,
+            pagination: isMajorChange ? DEFAULT_PAGINATION : state.pagination,
+            mapBounds: isMajorChange ? null : state.mapBounds,
         }));
     },
 
+
+
     // ---** Fetch hotels fresh (page 1) **---//
     fetchHotels: async () => {
-        const { filters } = get();
-        set({ loading: true, error: null, hotels: [], pagination: DEFAULT_PAGINATION });
+        const { filters, hotels, mapBounds } = get();
+
+        // If we have hotels and mapBounds, we might be panning. 
+        // We only clear if it's a fresh search (usually when mapBounds is null)
+        const isFreshSearch = hotels.length === 0 || !filters.bounds;
+
+        set({
+            loading: isFreshSearch,
+            error: null,
+            hotels: isFreshSearch ? [] : hotels,
+            pagination: isFreshSearch ? DEFAULT_PAGINATION : get().pagination
+        });
 
         try {
             const response = await fetchHotels({ ...filters, page: 1 });
@@ -69,9 +92,10 @@ const useHotelsStore = create<HotelsState>((set, get) => ({
         }
     },
 
+
     // ---** Append next page (infinite scroll) **---//
     appendHotels: async () => {
-        const { filters, isFetchingMore, pagination } = get();
+        const { filters, isFetchingMore, pagination, hotels } = get();
 
         // Prevent duplicate fetches and stop when no more pages
         if (isFetchingMore || !pagination.next_page_token) return;
@@ -99,7 +123,6 @@ const useHotelsStore = create<HotelsState>((set, get) => ({
     setBounds: (bounds) => {
         const current = get().mapBounds;
 
-        // Shallow comparison to prevent unnecessary state updates
         if (
             bounds &&
             current &&
@@ -112,8 +135,6 @@ const useHotelsStore = create<HotelsState>((set, get) => ({
         }
 
         set({ mapBounds: bounds });
-        // We don't call fetchHotels here anymore, because useHotels hook 
-        // will pick up the URL change (triggered in useMapBounds) and fetch.
     },
 
     // ---** Reset all hotels state **---//
