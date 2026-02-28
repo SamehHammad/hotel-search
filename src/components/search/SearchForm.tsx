@@ -9,13 +9,6 @@ import { format } from "date-fns";
 import {
     Search,
     MapPin,
-    Loader2,
-    Sparkles,
-    SlidersHorizontal,
-    ChevronDown,
-    Map,
-    Calendar,
-    Users
 } from "lucide-react";
 import useHotelsStore from "@/store/hotels.store";
 import { Input } from "@/components/ui/input";
@@ -25,8 +18,9 @@ import { GuestsSelector } from "./GuestsSelector";
 import { DEFAULT_SEARCH_FILTERS } from "@/lib/constants";
 import { RoomConfig } from "@/types/search.types";
 import Fuse from "fuse.js";
-import { CITY_SUGGESTIONS } from "@/data/suggestions";
+import { CITY_SUGGESTIONS, CitySuggestion } from "@/data/suggestions";
 import { cn } from "@/lib/utils";
+import { Calendar, Users } from "lucide-react";
 
 interface SearchFormProps {
     className?: string;
@@ -50,8 +44,16 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     const defaultCheckIn = new Date();
     const defaultCheckOut = new Date(Date.now() + 86400000);
 
-    // Local state for the form, initialized from URL search params
-    const [location, setLocation] = useState(searchParams.get("q") || t("defaultCity"));
+
+    const isWishlistMode = searchParams.get("wishlist") === "true";
+
+    const [location, setLocation] = useState(
+        isWishlistMode ? t("wishlistTitle") : (searchParams.get("q") || t("defaultCity"))
+    );
+
+    const [resolvedEnglishName, setResolvedEnglishName] = useState<string>(
+        isWishlistMode ? "Wishlist" : (searchParams.get("q") || t("defaultCity"))
+    );
 
     const [checkIn, setCheckIn] = useState<Date | undefined>(
         safeDateParse(searchParams.get("check_in_date") || DEFAULT_SEARCH_FILTERS.check_in_date, defaultCheckIn)
@@ -59,23 +61,41 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     const [checkOut, setCheckOut] = useState<Date | undefined>(
         safeDateParse(searchParams.get("check_out_date") || DEFAULT_SEARCH_FILTERS.check_out_date, defaultCheckOut)
     );
-    const [rooms, setRooms] = useState<RoomConfig[]>(
-        DEFAULT_SEARCH_FILTERS.rooms || [{ adults: 2, children: 0 }]
-    );
+    // Initial rooms from URL or default
+    const initAdults = parseInt(searchParams.get("adults") || "2", 10);
+    const initChildren = parseInt(searchParams.get("children") || "0", 10);
+    const initRoomsCount = parseInt(searchParams.get("rooms_count") || "1", 10);
+    const initialRooms = (): RoomConfig[] => {
+        const adultsPerRoom = Math.max(1, Math.floor(initAdults / initRoomsCount));
+        return Array.from({ length: initRoomsCount }, () => ({
+            adults: adultsPerRoom,
+            children: 0,
+        }));
+    };
 
-    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [rooms, setRooms] = useState<RoomConfig[]>(initialRooms());
+
+    const [suggestions, setSuggestions] = useState<CitySuggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
     const suggestionsRef = useRef<HTMLDivElement>(null);
 
-    // Local Fuse instance for instant searching
-    const fuse = useRef(new Fuse(CITY_SUGGESTIONS, {
-        keys: ["name", "country"],
-        threshold: 0.4,
-        distance: 100,
-        includeScore: true
-    }));
-
-    const [bestMatch, setBestMatch] = useState<any>(null);
+    /**
+     * Fuse.js configured to search on:
+     *  - name        → English city name
+     *  - country     → English country name
+     *  - aliases     → Arabic + alternate spellings
+     * threshold 0.35 is slightly stricter to avoid bad matches on short strings.
+     */
+    const fuse = useRef(
+        new Fuse(CITY_SUGGESTIONS, {
+            keys: ["name", "country", "aliases"],
+            threshold: 0.35,
+            distance: 200,
+            includeScore: true,
+            // Allow matching individual items in the aliases array
+            useExtendedSearch: false,
+        })
+    );
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -87,26 +107,58 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleLocationChange = (val: string) => {
-        setLocation(val);
-        if (val.length < 2) {
-            setSuggestions([]); setBestMatch(null); setShowSuggestions(false);
-            return;
-        }
+    /*** Try an exact alias match first (faster & more accurate for Arabic input)*/
+    const searchCities = (val: string): CitySuggestion[] => {
+        const lower = val.toLowerCase().trim();
+        if (!lower) return [];
+
+        // 1. Exact alias match (handles Arabic perfectly)
+        const exactMatches = CITY_SUGGESTIONS.filter(
+            (c) =>
+                c.name.toLowerCase() === lower ||
+                c.aliases.some((a) => a === lower || a.includes(lower) || lower.includes(a))
+        );
+        if (exactMatches.length > 0) return exactMatches.slice(0, 5);
+
+        // 2. Fuse fuzzy match
         const results = fuse.current.search(val);
-        const mappedResults = results.map(r => r.item).slice(0, 5);
-        setSuggestions(mappedResults);
-        if (results.length > 0 && results[0].score! > 0.1) setBestMatch(results[0].item);
-        else setBestMatch(null);
-        setShowSuggestions(mappedResults.length > 0);
+        return results.map((r) => r.item).slice(0, 5);
     };
 
-    const handleSelectSuggestion = (city: any) => {
-        setLocation(`${city.name}, ${city.country}`);
+    const handleLocationChange = (val: string) => {
+        setLocation(val);
+        // Reset resolved name to the raw input until a suggestion is selected
+        setResolvedEnglishName(val);
+
+        if (val.length < 2) {
+            setSuggestions([]);
+            setShowSuggestions(false);
+            return;
+        }
+
+        const found = searchCities(val);
+        setSuggestions(found);
+        setShowSuggestions(found.length > 0);
+    };
+
+    /**
+     * When user picks a suggestion:
+     * - Show the city name in THEIR language in the input (using the alias they typed maps to, or English)
+     * - Store the English name internally for the URL
+     */
+    const handleSelectSuggestion = (city: CitySuggestion, displayText?: string) => {
+        // Display text is what the user sees; default to English city name
+        const display = displayText ?? `${city.name}, ${city.country}`;
+        setLocation(display);
+        // Always resolve to the English city name for the search URL
+        setResolvedEnglishName(city.name);
+        setSuggestions([]);
         setShowSuggestions(false);
+
         if (variant === "header") {
             const params = new URLSearchParams(searchParams.toString());
-            params.set("q", `${city.name}, ${city.country}`);
+            // Use ENGLISH name in URL so the API can match it
+            params.set("q", city.name);
             router.push(`${pathname}?${params.toString()}`);
         }
     };
@@ -114,18 +166,49 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
         if (!location.trim()) return;
-        if (checkIn && checkOut && checkOut <= checkIn) {
-            return;
-        }
+        if (checkIn && checkOut && checkOut <= checkIn) return;
+
         const isValidDate = (d: any): d is Date => d instanceof Date && !isNaN(d.getTime());
-        const checkInStr = isValidDate(checkIn) ? format(checkIn, "yyyy-MM-dd") : (DEFAULT_SEARCH_FILTERS.check_in_date || "");
-        const checkOutStr = isValidDate(checkOut) ? format(checkOut, "yyyy-MM-dd") : (DEFAULT_SEARCH_FILTERS.check_out_date || "");
+        const checkInStr = isValidDate(checkIn)
+            ? format(checkIn, "yyyy-MM-dd")
+            : DEFAULT_SEARCH_FILTERS.check_in_date || "";
+        const checkOutStr = isValidDate(checkOut)
+            ? format(checkOut, "yyyy-MM-dd")
+            : DEFAULT_SEARCH_FILTERS.check_out_date || "";
 
         const totalAdults = rooms.reduce((acc, r) => acc + r.adults, 0);
         const totalChildren = rooms.reduce((acc, r) => acc + r.children, 0);
 
+        /**
+         * Critical: always send the English city name in `q` so the API can match it.
+         * 1. If the user selected a suggestion → resolvedEnglishName is already the EN name.
+         * 2. If the user typed freely → try to resolve it via alias matching.
+         * 3. Fallback to raw input.
+         */
+        let queryValue = resolvedEnglishName;
+
+        // Try to resolve if the user typed without selecting a suggestion
+        if (queryValue === location) {
+            const found = searchCities(location);
+            if (found.length > 0) {
+                queryValue = found[0].name;
+                // Also update internal state so the next time it's correct
+                setResolvedEnglishName(found[0].name);
+            }
+        }
+
         const params = new URLSearchParams(searchParams.toString());
-        params.set("q", location);
+
+        // If the query value is "Wishlist", we keep the wishlist flag and delete 'q'
+        // If the user changed the input, we delete 'wishlist' flag and set 'q'
+        if (queryValue === "Wishlist" || queryValue === t("wishlistTitle")) {
+            params.set("wishlist", "true");
+            params.delete("q");
+        } else {
+            params.set("q", queryValue);
+            params.delete("wishlist");
+        }
+
         params.set("check_in_date", checkInStr);
         params.set("check_out_date", checkOutStr);
         params.set("adults", String(totalAdults));
@@ -139,6 +222,7 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     };
 
     const isHeader = variant === "header";
+    // City display name: what's in the input (may be Arabic)
     const cityName = location.split(",")[0] || t("defaultCity");
 
 
@@ -149,15 +233,6 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
             isHeader && "bg-white p-0",
             className
         )}>
-            {/* Header Variant Dynamic Title */}
-            {isHeader && (
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-[#051c34] tracking-tight">
-                        {t("explore")} <span className="text-primary">{cityName}</span>
-                    </h1>
-
-                </div>
-            )}
 
             {/* Main Search Logic Container */}
             <form onSubmit={handleSubmit} className="flex flex-col lg:flex-row items-stretch lg:items-center gap-3 w-full">
@@ -174,21 +249,28 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                         <Input
                             value={location}
                             onChange={(e) => handleLocationChange(e.target.value)}
-                            onFocus={() => location.length >= 2 && setShowSuggestions(true)}
+                            onFocus={() => location.length >= 2 && setShowSuggestions(suggestions.length > 0)}
                             placeholder={t("locationPlaceholder")}
                             className="h-8 p-0 border-none shadow-none focus-visible:ring-0 font-bold text-slate-600 text-[15px] placeholder:text-slate-400 placeholder:font-normal"
                             required
                             autoComplete="off"
+                            dir="auto"
                         />
                         {showSuggestions && (
                             <div className="absolute top-[calc(100%+12px)] start-[-16px] end-[-16px] bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-[110] overflow-hidden">
                                 <div className="max-h-[300px] overflow-y-auto px-2">
                                     {suggestions.map((city) => (
-                                        <button key={city.id} type="button" onClick={() => handleSelectSuggestion(city)} className="w-full px-4 py-3 flex items-center gap-4 hover:bg-slate-50 rounded-xl transition-all text-left group">
+                                        <button
+                                            key={city.id}
+                                            type="button"
+                                            onClick={() => handleSelectSuggestion(city, `${city.name}, ${city.country}`)}
+                                            className="w-full px-4 py-3 flex items-center gap-4 hover:bg-slate-50 rounded-xl transition-all text-left group"
+                                        >
                                             <div className="bg-slate-100 p-2.5 rounded-xl text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                                 <MapPin className="h-5 w-5" />
                                             </div>
                                             <div>
+                                                {/* Always show English name in suggestions for clarity */}
                                                 <div className="font-bold text-slate-800 text-sm group-hover:text-primary">{city.name}</div>
                                                 <div className="text-[11px] text-slate-400 font-medium">{city.country}</div>
                                             </div>

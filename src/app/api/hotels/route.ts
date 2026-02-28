@@ -43,49 +43,107 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const amenities = amenitiesParam ? amenitiesParam.split(",").filter(a => a.length > 0) : [];
 
     const boundsStr = searchParams.get("bounds");
+    const wishlistTokens = searchParams.get("wishlist_tokens");
 
     // --- Determine potential city from query ---
     const normalizedQ = q.toLowerCase().trim();
-    const matchedCity = CITY_SUGGESTIONS.find(c =>
-        normalizedQ.includes(c.name.toLowerCase()) ||
-        c.name.toLowerCase().includes(normalizedQ)
-    );
 
-    const isNYC = normalizedQ === "new york hotels" || normalizedQ === "new york" || normalizedQ === "";
+    /**
+     * City matching priority:
+     * 1. Exact English name match (e.g. "Dubai")
+     * 2. English name contains / is contained by query
+     * 3. Arabic alias exact match (e.g. "دبي")
+     * 4. Arabic alias partial match
+     */
+    const matchedCity = CITY_SUGGESTIONS.find((c) => {
+        const cityLower = c.name.toLowerCase();
+        // Exact English name
+        if (cityLower === normalizedQ) return true;
+        // English partial
+        if (cityLower.includes(normalizedQ) || normalizedQ.includes(cityLower)) return true;
+        // Arabic / alias matching
+        if (c.aliases?.some((a) => {
+            const aLower = a.toLowerCase();
+            return aLower === normalizedQ || aLower.includes(normalizedQ) || normalizedQ.includes(aLower);
+        })) return true;
+        return false;
+    });
 
     // --- Data selection logic ---
     let hotels: Hotel[] = [];
 
-    if (page === 1) {
-        // If no specific query, show all mock hotels
-        if (!q || q.length < 2) {
-            hotels = [...MOCK_HOTELS];
-        } else if (matchedCity) {
-            // Combine both MOCK and Generated hotels for the city
-            const cityMocks = MOCK_HOTELS.filter(h =>
-                h.city.toLowerCase() === matchedCity.name.toLowerCase()
-            );
-            const generated = generateMoreHotels(1, matchedCity.name, matchedCity.country, matchedCity.lat, matchedCity.lng);
-            hotels = [...cityMocks, ...generated];
-        } else if (isNYC) {
-            const cityMocks = MOCK_HOTELS.filter(h => h.city === "New York");
-            const generated = generateMoreHotels(1, "New York", "United States", 40.7128, -74.0060);
-            hotels = [...cityMocks, ...generated];
-        } else {
-            // Fallback to all hotels
-            hotels = [...MOCK_HOTELS];
+    if (wishlistTokens) {
+        if (page > 1) {
+            hotels = [];
+        } else if (wishlistTokens.length > 0) {
+            // [Wishlist Mode]: IGNORE city query, return specific requested tokens
+            const tokens = wishlistTokens.split(",");
+            for (const token of tokens) {
+                const foundMock = MOCK_HOTELS.find(h => h.property_token === token);
+                if (foundMock) {
+                    hotels.push(foundMock);
+                } else {
+                    // Regex parses: "mock_page1_token_New_York_5" -> page=1, city="New_York", idx=5
+                    const match = token.match(/^mock_page(\d+)_token_(.+)_(\d+)$/);
+                    if (match) {
+                        const pageVal = parseInt(match[1], 10);
+                        const cityStr = match[2].replace(/_/g, " ");
+                        const idx = parseInt(match[3], 10);
+
+                        const matchedCity = CITY_SUGGESTIONS.find(c => c.name.toLowerCase() === cityStr.toLowerCase());
+                        if (matchedCity) {
+                            const generated = generateMoreHotels(
+                                pageVal,
+                                matchedCity.name,
+                                matchedCity.country,
+                                matchedCity.lat,
+                                matchedCity.lng
+                            );
+                            if (generated[idx]) {
+                                hotels.push(generated[idx]);
+                            }
+                        }
+                    }
+                }
+            }
         }
     } else {
-        if (matchedCity || isNYC || !q) {
-            hotels = generateMoreHotels(
-                page,
-                matchedCity?.name || "New York",
-                matchedCity?.country || "United States",
-                matchedCity?.lat || 40.75,
-                matchedCity?.lng || -73.98
-            );
+        // [Normal search Mode]: Use city query 
+        if (page === 1) {
+            if (!q || q.length < 2) {
+                // No query → show all mock hotels
+                hotels = [...MOCK_HOTELS];
+            } else if (matchedCity) {
+                // Matched a known city → combine MOCK + Generated hotels for that city
+                const cityMocks = MOCK_HOTELS.filter(
+                    (h) => h.city.toLowerCase() === matchedCity.name.toLowerCase()
+                );
+                const generated = generateMoreHotels(
+                    1,
+                    matchedCity.name,
+                    matchedCity.country,
+                    matchedCity.lat,
+                    matchedCity.lng
+                );
+                hotels = [...cityMocks, ...generated];
+            } else {
+                // Unknown city query → return empty (no wrong fallback!)
+                hotels = [];
+            }
         } else {
-            hotels = [];
+            if (matchedCity) {
+                hotels = generateMoreHotels(
+                    page,
+                    matchedCity.name,
+                    matchedCity.country,
+                    matchedCity.lat,
+                    matchedCity.lng
+                );
+            } else if (!q) {
+                hotels = generateMoreHotels(page, "Featured", "", 0, 0);
+            } else {
+                hotels = [];
+            }
         }
     }
 
@@ -132,22 +190,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         });
     }
 
-    // --- Dynamic transformation for "Custom Queries" ---
-    const shouldTransform = q && !isNYC && hotels.some(h => h.city === "New York" || h.city === "New York City");
-    if (shouldTransform && matchedCity) {
-        hotels = JSON.parse(JSON.stringify(hotels)).map((h: Hotel) => {
-            return {
-                ...h,
-                city: matchedCity.name,
-                country: matchedCity.country,
-                name: h.name.includes("New York") ? h.name.replace("New York", matchedCity.name) : `${h.name} ${matchedCity.name}`,
-                gps_coordinates: {
-                    latitude: matchedCity.lat + (Math.random() - 0.5) * 0.05,
-                    longitude: matchedCity.lng + (Math.random() - 0.5) * 0.05,
-                }
-            };
-        });
-    }
+    // --- (Transformation block removed: hotels are now always fetched for the correct city) ---
 
     // --- Bounds Filtering (Bypass if specific property is searched) ---
     if (boundsStr && !propertyName) {
@@ -215,7 +258,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         pagination: {
             records_from: recordsFrom,
             records_to: recordsTo,
-            ...(page < 5 ? { next_page_token: `page_${page + 1}_token` } : {}),
+            ...((page < 5 && !wishlistTokens) ? { next_page_token: `page_${page + 1}_token` } : {}),
         },
     };
 

@@ -28,6 +28,7 @@ export async function fetchHotels(
             hotel_stars: filters.hotel_stars?.join(","),
             sort_by: filters.sort_by,
             property_name: filters.property_name,
+            wishlist_tokens: filters.wishlist_tokens?.join(","),
         },
     });
 }

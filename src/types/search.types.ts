@@ -32,6 +32,8 @@ export interface SearchFilters {
     hotel_stars?: number[];
     sort_by?: string;
     property_name?: string;
+    wishlist_tokens?: string[];
+    is_wishlist?: boolean;
 }
 
 export interface SearchFormValues {

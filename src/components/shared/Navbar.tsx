@@ -137,7 +137,12 @@ export function Navbar() {
                     </DropdownMenu>
 
                     {/* Wishlist Heart */}
-                    <Button variant="ghost" size="icon" className="group rounded-full text-slate-600 hover:text-primary relative">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="group rounded-full text-slate-600 hover:text-primary relative"
+                        onClick={() => router.push(`/${locale}/hotels?wishlist=true`)}
+                    >
                         <Heart className={cn("w-6 h-6 transition-all", wishlistCount > 0 ? "fill-red-500 text-red-500" : "")} />
                         {wishlistCount > 0 && (
                             <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white px-1">

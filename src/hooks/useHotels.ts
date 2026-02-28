@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import useHotelsStore from "@/store/hotels.store";
+import useWishlistStore from "@/store/wishlist.store";
 import { useShallow } from "zustand/react/shallow";
 
 /** Hook that triggers initial hotel fetch on mount and syncs with URL */
@@ -41,12 +42,20 @@ export function useHotels() {
 
     // ---** Sync Store -> URL **---//
     useEffect(() => {
-        if (!filters.q) return;
+        if (!filters.q && !filters.is_wishlist) return;
 
         const params = new URLSearchParams();
-        params.set("q", filters.q);
+        if (filters.q && !filters.is_wishlist) {
+            params.set("q", filters.q);
+        }
+        if (filters.is_wishlist) {
+            params.set("wishlist", "true");
+        }
         params.set("adults", filters.guests.adults.toString());
         params.set("children", filters.guests.children.toString());
+        if (filters.rooms && filters.rooms.length > 0) {
+            params.set("rooms_count", filters.rooms.length.toString());
+        }
 
         if (filters.check_in_date) params.set("check_in_date", filters.check_in_date);
         if (filters.check_out_date) params.set("check_out_date", filters.check_out_date);
@@ -69,20 +78,32 @@ export function useHotels() {
 
     // ---** Sync URL -> Store **---//
     useEffect(() => {
-        const q = searchParams.get("q");
+        const isWishlistMode = searchParams.get("wishlist") === "true";
+        const qParam = searchParams.get("q");
+        const q = qParam || (isWishlistMode ? "Wishlist" : null);
 
-        if (!q) {
+        if (!q && !isWishlistMode) {
             resetHotels();
             return;
         }
 
+        const wishlistTokens = isWishlistMode ? useWishlistStore.getState().wishlist : undefined;
+
         const adults = parseInt(searchParams.get("adults") || "2", 10);
         const children = parseInt(searchParams.get("children") || "0", 10);
+        const rooms_count = parseInt(searchParams.get("rooms_count") || "1", 10);
         const min_price = parseInt(searchParams.get("min_price") || "0", 10);
         const max_price = parseInt(searchParams.get("max_price") || "2000", 10);
         const stars = searchParams.get("stars")?.split(",").map(Number).filter(n => !isNaN(n)) || [];
         const amenities = searchParams.get("amenities")?.split(",").filter(Boolean) || [];
         const property_name = searchParams.get("property_name") || "";
+
+        // Build rooms array from count (distribute adults/children equally)
+        const adultsPerRoom = Math.max(1, Math.floor(adults / rooms_count));
+        const rooms = Array.from({ length: rooms_count }, () => ({
+            adults: adultsPerRoom,
+            children: 0,
+        }));
 
         const boundsParam = searchParams.get("bounds");
         const bounds = boundsParam ? {
@@ -99,12 +120,15 @@ export function useHotels() {
             q !== storeFilters.q ||
             adults !== storeFilters.guests.adults ||
             children !== storeFilters.guests.children ||
+            rooms_count !== (storeFilters.rooms?.length ?? 1) ||
             min_price !== (storeFilters.min_price || 0) ||
             max_price !== (storeFilters.max_price || 2000) ||
             JSON.stringify(stars.sort()) !== JSON.stringify((storeFilters.hotel_stars || []).sort()) ||
             JSON.stringify(amenities.sort()) !== JSON.stringify((storeFilters.amenities || []).sort()) ||
             property_name !== (storeFilters.property_name || "") ||
-            JSON.stringify(bounds) !== JSON.stringify(storeFilters.bounds);
+            JSON.stringify(bounds) !== JSON.stringify(storeFilters.bounds) ||
+            JSON.stringify(wishlistTokens?.sort() || []) !== JSON.stringify((storeFilters.wishlist_tokens || []).sort()) ||
+            isWishlistMode !== (storeFilters.is_wishlist || false);
 
         if (!hasChanged) return;
 
@@ -113,16 +137,19 @@ export function useHotels() {
         }
 
         setFilters({
-            q,
+            q: q || "Wishlist",
             check_in_date: searchParams.get("check_in_date") || undefined,
             check_out_date: searchParams.get("check_out_date") || undefined,
             guests: { adults, children },
+            rooms,
             min_price,
             max_price,
             hotel_stars: stars,
             amenities,
             property_name,
             bounds,
+            wishlist_tokens: wishlistTokens,
+            is_wishlist: isWishlistMode,
         });
 
         fetchHotels();
