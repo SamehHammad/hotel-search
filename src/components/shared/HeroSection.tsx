@@ -2,7 +2,6 @@
 
 import { useTranslations } from "next-intl";
 import { SearchForm } from "../search/SearchForm";
-import Image from "next/image";
 
 export function HeroSection() {
     const t = useTranslations("search");

@@ -1,8 +1,7 @@
-//---** Reusable Hero Slider component using Swiper.js **---//
+//---** Hero Slider component using Swiper.js **---//
 
 "use client";
 
-import React from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";

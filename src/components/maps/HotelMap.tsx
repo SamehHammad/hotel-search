@@ -2,14 +2,14 @@
 
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { setOptions, importLibrary } from "@googlemaps/js-api-loader";
 import { MarkerClusterer, SuperClusterAlgorithm } from "@googlemaps/markerclusterer";
 import { useHotels } from "@/hooks/useHotels";
 import { useMapBounds } from "@/hooks/useMapBounds";
 import { GOOGLE_MAPS_API_KEY, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM } from "@/lib/constants";
-import { MapPin, RefreshCw, Building2 } from "lucide-react";
+import { MapPin, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function HotelMap() {
@@ -23,7 +23,7 @@ export function HotelMap() {
     const markersRef = useRef<google.maps.marker.AdvancedMarkerElement[]>([]);
     const [mapError, setMapError] = useState<string | null>(null);
 
-    // Initialize Maps
+    //---** Initialize Google Maps and set up libraries **---//
     useEffect(() => {
         if (!mapRef.current) return;
 
@@ -35,9 +35,8 @@ export function HotelMap() {
                     libraries: ["marker"],
                 });
 
-                // Initialize libraries
+                //---** Import required libraries from Google Maps SDK **---//
                 const coreLibrary = await importLibrary("maps") as google.maps.MapsLibrary;
-                const markerLibrary = await importLibrary("marker") as google.maps.MarkerLibrary;
 
                 const map = new coreLibrary.Map(mapRef.current!, {
                     center: MAP_DEFAULT_CENTER,
@@ -66,7 +65,7 @@ export function HotelMap() {
                     ]
                 });
 
-                // Listen to Map Idle event to update bounds
+                //---** Listen to Map Idle event to update search bounds **---//
                 map.addListener("idle", () => {
                     onMapIdle(map);
                 });
@@ -82,12 +81,12 @@ export function HotelMap() {
         return () => clearTimeout(timer);
     }, [onMapIdle]);
 
-    // Sync Markers with Clustering
+    //---** Synchronize hotel markers and clustering when data changes **---//
     useEffect(() => {
         if (!mapInstance || loading) return;
 
         const syncMarkers = async () => {
-            // Clear old markers and clusterer
+            //---** Clear previous markers and reset clusterer **---//
             markersRef.current.forEach((marker) => {
                 marker.map = null;
             });
@@ -97,20 +96,20 @@ export function HotelMap() {
                 clustererRef.current.clearMarkers();
             }
 
-            // Create new markers
+            //---** Map hotel data to custom advanced markers **---//
             const newMarkers = hotels.map((hotel: import("@/types/hotel.types").Hotel) => {
                 const { latitude, longitude } = hotel.gps_coordinates;
                 const priceMatch = hotel.price_per_night.price.match(/\d+/);
                 const priceValue = priceMatch ? parseInt(priceMatch[0]) : 150;
 
-                // Professional Custom Pin
+                //---** Create custom HTML element for the price pin **---//
                 const pinElement = document.createElement("div");
                 pinElement.className = cn(
                     "relative group cursor-pointer transition-all duration-300",
                     "hover:z-50 hover:scale-110"
                 );
 
-                // Determine color theme based on price
+                //---** Determine dynamic color theme based on price range **---//
                 const priceColor = priceValue > 500 ? "bg-[#051c34]" : priceValue > 200 ? "bg-indigo-600" : "bg-emerald-600";
 
                 pinElement.innerHTML = `
@@ -136,7 +135,7 @@ export function HotelMap() {
 
             markersRef.current = newMarkers;
 
-            // Initialize or Refresh Clusterer
+            //---** Initialize or update the marker clusterer **---//
             if (!clustererRef.current) {
                 clustererRef.current = new MarkerClusterer({
                     map: mapInstance,
@@ -167,7 +166,7 @@ export function HotelMap() {
                 clustererRef.current.addMarkers(newMarkers);
             }
 
-            // Auto-fit bounds ONLY if there are hotels and we don't have user-driven mapBounds
+            //---** Auto-adjust map viewport to fit all markers if no manual bounds exist **---//
             if (hotels.length > 0 && !mapBounds) {
                 const bounds = new google.maps.LatLngBounds();
                 hotels.forEach((h: import("@/types/hotel.types").Hotel) => {
@@ -180,6 +179,7 @@ export function HotelMap() {
         syncMarkers();
     }, [hotels, mapInstance, mapBounds, loading]);
 
+    //---** Render error state if map failes to initialize **---//
     if (mapError) {
         return (
             <div className="w-full h-full min-h-[400px] bg-slate-100 rounded-3xl flex items-center justify-center flex-col text-slate-500">
@@ -191,10 +191,10 @@ export function HotelMap() {
 
     return (
         <div className="relative w-full h-full min-h-[400px] bg-slate-100 rounded-3xl overflow-hidden shadow-sm border border-slate-200 isolation-isolate">
-            {/* Map Container */}
+            {/*---** Google Maps Rendering Layer **---*/}
             <div ref={mapRef} className="w-full h-full absolute inset-0 rounded-3xl outline-none" />
 
-            {/* Floating Controls Overlay */}
+            {/*---** Custom Floating Zoom Controls **---*/}
             <div className="absolute top-6 right-6 flex flex-col gap-2 z-10">
                 <button
                     onClick={() => mapInstance?.setZoom((mapInstance.getZoom() || 0) + 1)}
@@ -206,7 +206,7 @@ export function HotelMap() {
                 >-</button>
             </div>
 
-            {/* Syncing Overlay Indicator */}
+            {/*---** Loading indicator reflecting active API state **---*/}
             {loading && (
                 <div className="absolute top-4 inset-x-0 mx-auto w-fit bg-white/95 backdrop-blur-md shadow-lg rounded-full px-4 py-2 flex items-center gap-2.5 z-10 border border-indigo-50/50">
                     <RefreshCw className="w-4 h-4 text-indigo-500 animate-spin" />
@@ -214,7 +214,7 @@ export function HotelMap() {
                 </div>
             )}
 
-            {/* Marker count badge */}
+            {/*---** Result summary badge showing total properties in view **---*/}
             {!loading && hotels.length > 0 && (
                 <div className="absolute bottom-6 left-6 bg-[#051c34] text-white shadow-2xl rounded-2xl px-4 py-2.5 z-10 flex items-center gap-3 border border-indigo-500/20">
                     <div className="w-2 h-2 rounded-full bg-indigo-300 animate-ping" />
@@ -223,7 +223,6 @@ export function HotelMap() {
                     </span>
                 </div>
             )}
-
         </div>
     );
 }

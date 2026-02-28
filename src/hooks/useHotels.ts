@@ -1,4 +1,4 @@
-//---** useHotels: orchestrates hotel fetching with store integration **---//
+//---** useHotels: orchestrates hotel fetching with store integration and URL synchronization **---//
 
 import { useEffect, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
@@ -6,7 +6,7 @@ import useHotelsStore from "@/store/hotels.store";
 import useWishlistStore from "@/store/wishlist.store";
 import { useShallow } from "zustand/react/shallow";
 
-/** Hook that triggers initial hotel fetch on mount and syncs with URL */
+//---** Custom hook for managing hotel search state and database interactions **---//
 export function useHotels() {
     const router = useRouter();
     const pathname = usePathname();
@@ -40,7 +40,7 @@ export function useHotels() {
         }))
     );
 
-    // ---** Sync Store -> URL **---//
+    //---** Synchronize internal filter state with URL parameters for deep linking **---//
     useEffect(() => {
         if (!filters.q && !filters.is_wishlist) return;
 
@@ -76,7 +76,7 @@ export function useHotels() {
         }
     }, [filters, pathname, router]);
 
-    // ---** Sync URL -> Store **---//
+    //---** Load filters from URL parameters into internal store state on mount or URL change **---//
     useEffect(() => {
         const isWishlistMode = searchParams.get("wishlist") === "true";
         const qParam = searchParams.get("q");
@@ -98,7 +98,7 @@ export function useHotels() {
         const amenities = searchParams.get("amenities")?.split(",").filter(Boolean) || [];
         const property_name = searchParams.get("property_name") || "";
 
-        // Build rooms array from count (distribute adults/children equally)
+        //---** Map basic guest counts to a room configuration structure **---//
         const adultsPerRoom = Math.max(1, Math.floor(adults / rooms_count));
         const rooms = Array.from({ length: rooms_count }, () => ({
             adults: adultsPerRoom,
@@ -115,7 +115,7 @@ export function useHotels() {
 
         const storeFilters = useHotelsStore.getState().filters;
 
-        // Complex comparison to prevent loops
+        //---** Validate state changes before triggering a new fetch cycle **---//
         const hasChanged =
             q !== storeFilters.q ||
             adults !== storeFilters.guests.adults ||

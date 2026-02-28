@@ -1,3 +1,5 @@
+//---** Sidebar filter component for property search and amenities **---//
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -26,22 +28,24 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
     const { filters, setFilters, fetchHotels, pagination, loading } = useHotelsStore();
     const [nameSearch, setNameSearch] = useState(filters.property_name || "");
 
-    // Update local input if store changes (e.g. from Clear All)
+    //---** Sync local search input state with global store updates **---//
     useEffect(() => {
         setNameSearch(filters.property_name || "");
     }, [filters.property_name]);
 
-    // Debounced version of setFilters for text input
+    //---** Debounced filter update to prevent excessive API requests **---//
     const debouncedSetFilters = useDebouncedCallback((val: string) => {
         setFilters({ property_name: val });
         fetchHotels();
     }, 500);
 
+    //---** Handle price slider range changes **---//
     const handlePriceChange = (values: number[]) => {
         setFilters({ min_price: values[0], max_price: values[1] });
         fetchHotels();
     };
 
+    //---** Toggle star rating selection in filters **---//
     const toggleStar = (star: number) => {
         const currentStars = filters.hotel_stars || [];
         const nextStars = currentStars.includes(star)
@@ -52,6 +56,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
         fetchHotels();
     };
 
+    //---** Toggle amenity selection in filters **---//
     const toggleAmenity = (amenity: string) => {
         const currentAmenities = filters.amenities || [];
         const nextAmenities = currentAmenities.includes(amenity)
@@ -62,6 +67,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
         fetchHotels();
     };
 
+    //---** Reset all applied filters to default values **---//
     const handleClearFilters = () => {
         setFilters({
             property_name: "",
@@ -75,7 +81,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
 
     return (
         <div className="flex flex-col gap-6 w-full pb-10">
-            {/* Header with Stats */}
+            {/*---** Section Header: Title and total results count **---*/}
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
                     <h3 className="text-2xl font-black text-[#051c34] tracking-tight flex items-center gap-2">
@@ -88,7 +94,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                 </div>
             </div>
 
-            {/* Map Preview Card */}
+            {/*---** Interactive Map Preview Card **---*/}
             <div
                 className="group relative cursor-pointer overflow-hidden rounded-[24px] border border-slate-200 bg-white p-1 hover:shadow-xl transition-all duration-500"
                 onClick={onViewMap}
@@ -106,7 +112,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                 </div>
             </div>
 
-            {/* Property Name Search */}
+            {/*---** Property Name Search: Live filtering by text **---*/}
             <div className="space-y-3">
                 <h3 className="text-sm font-black text-[#051c34] tracking-tight uppercase">{t("searchByPropertyName")}</h3>
                 <div className="relative">
@@ -123,9 +129,9 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                 </div>
             </div>
 
-            {/* Main Filter Section */}
+            {/*---** Main Accordion: Collapsible price and amenity filters **---*/}
             <Accordion type="multiple" defaultValue={["price", "rating"]} className="w-full space-y-3">
-                {/* Nightly Price Slider */}
+                {/*---** Nightly Price Selection Slider **---*/}
                 <AccordionItem value="price" className="border-none bg-white rounded-[24px] px-5 py-0 shadow-sm border border-slate-100 overflow-hidden">
                     <AccordionTrigger className="hover:no-underline py-4">
                         <span className="font-black text-[#051c34] text-[15px] tracking-tight">{t("nightlyPrice")}</span>
@@ -156,7 +162,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                     </AccordionContent>
                 </AccordionItem>
 
-                {/* Star Rating Selection */}
+                {/*---** Star Rating Selection Buttons **---*/}
                 <AccordionItem value="rating" className="border-none bg-white rounded-[24px] px-5 py-0 shadow-sm border border-slate-100 overflow-hidden">
                     <AccordionTrigger className="hover:no-underline py-4">
                         <span className="font-black text-[#051c34] text-[15px] tracking-tight">{t("starRating")}</span>
@@ -185,7 +191,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                     </AccordionContent>
                 </AccordionItem>
 
-                {/* Amenities */}
+                {/*---** Popular Amenities Checkboxes **---*/}
                 <AccordionItem value="amenities" className="border-none bg-white rounded-[24px] px-5 py-0 shadow-sm border border-slate-100 overflow-hidden">
                     <AccordionTrigger className="hover:no-underline py-4">
                         <span className="font-black text-[#051c34] text-[15px] tracking-tight">{t("popularFilters")}</span>
@@ -224,7 +230,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                 </AccordionItem>
             </Accordion>
 
-            {/* Clear All Button */}
+            {/*---** Footer Button: Global filter reset **---*/}
             <div className="pt-2">
                 <Button
                     variant="ghost"
@@ -239,6 +245,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
     );
 }
 
+//---** Helper component for rendering map placeholder graphic **---//
 function ImagePreview() {
     return (
         <img

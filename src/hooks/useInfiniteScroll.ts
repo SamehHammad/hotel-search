@@ -1,4 +1,4 @@
-//---** useInfiniteScroll: IntersectionObserver-based scroll trigger **---//
+//---** useInfiniteScroll: InteractionObserver-based scroll trigger for pagination **---//
 
 "use client";
 
@@ -11,11 +11,7 @@ interface UseInfiniteScrollOptions {
     threshold?: number;
 }
 
-/**
- * Returns a ref to attach to a sentinel element.
- * When the sentinel enters the viewport AND hasMore && !loading,
- * it calls onLoadMore exactly once per intersection.
- */
+//---** Custom hook to manage infinite scroll behavior using Intersection Observer **---//
 export function useInfiniteScroll({
     onLoadMore,
     hasMore,
@@ -24,6 +20,7 @@ export function useInfiniteScroll({
 }: UseInfiniteScrollOptions) {
     const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+    //---** Handle visibility changes of the sentinel element to trigger data fetching **---//
     const handleIntersection = useCallback(
         (entries: IntersectionObserverEntry[]) => {
             const [entry] = entries;
@@ -34,6 +31,7 @@ export function useInfiniteScroll({
         [hasMore, loading, onLoadMore]
     );
 
+    //---** Initialize and clean up the intersection observer for the target element **---//
     useEffect(() => {
         const sentinel = sentinelRef.current;
         if (!sentinel) return;

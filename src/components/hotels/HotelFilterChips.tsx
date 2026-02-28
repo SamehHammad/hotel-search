@@ -1,7 +1,9 @@
+//---** Active filter chips and sorting header for hotel results **---//
+
 "use client";
 
 import { useTranslations } from "next-intl";
-import { X, SlidersHorizontal, Info } from "lucide-react";
+import { X, Info } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,6 +25,7 @@ export function HotelFilterChips() {
     const t = useTranslations("hotels");
     const { filters, pagination, setFilters, fetchHotels, hotels } = useHotelsStore();
 
+    //---** Build the list of active filter objects based on current state **---//
     const activeFilters = [];
     if (filters.property_name) activeFilters.push({ id: "property_name", label: filters.property_name, value: filters.property_name });
 
@@ -46,6 +49,7 @@ export function HotelFilterChips() {
         });
     }
 
+    //---** Execute filter removal and trigger a fresh data fetch **---//
     const handleRemoveFilter = (filter: any) => {
         if (filter.id === "property_name") setFilters({ property_name: "" });
         else if (filter.id === "price") setFilters({ min_price: 0, max_price: 2000 });
@@ -60,6 +64,7 @@ export function HotelFilterChips() {
 
     return (
         <div className="w-full space-y-4 mb-6 pt-1">
+            {/*---** Container for active filter badges **---*/}
             <div className="flex flex-wrap items-center gap-2">
                 {activeFilters.map((filter) => (
                     <Badge
@@ -76,6 +81,7 @@ export function HotelFilterChips() {
                     </Badge>
                 ))}
 
+                {/*---** Global clear button appearing when filters exist **---*/}
                 {activeFilters.length > 0 && (
                     <Button
                         variant="ghost"
@@ -97,6 +103,7 @@ export function HotelFilterChips() {
                 )}
             </div>
 
+            {/*---** Results count and sorting dropdown row **---*/}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                 <div className="space-y-0.5">
                     <h2 className="text-xl font-bold text-[#051c34] tracking-tight flex items-center gap-3">
@@ -105,6 +112,7 @@ export function HotelFilterChips() {
                     <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium lowercase">
                         <span>{t("sortOrder")}</span>
 
+                        {/*---** Informational tooltip for sorting logic **---*/}
                         <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
@@ -118,6 +126,7 @@ export function HotelFilterChips() {
                     </div>
                 </div>
 
+                {/*---** Sort order selection control **---*/}
                 <div className="flex items-center gap-3 shrink-0">
                     <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest hidden md:block">{t("sortBy")}:</span>
                     <Select defaultValue="recommended" onValueChange={(val) => {

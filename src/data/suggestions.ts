@@ -1,4 +1,4 @@
-// City suggestions with Arabic aliases for multilingual search support
+//---** City suggestions with Arabic aliases for multilingual search support **---//
 export const CITY_SUGGESTIONS = [
     {
         id: "cairo-eg",
@@ -7,7 +7,7 @@ export const CITY_SUGGESTIONS = [
         country_code: "EG",
         lat: 30.0444,
         lng: 31.2357,
-        // Arabic aliases – used for suggestion matching only; the EN name is sent to the API
+        //---** Arabic aliases – used for suggestion matching only; the EN name is sent to the API **---//
         aliases: ["القاهرة", "القاهره", "قاهره", "قاهرة", "cairo"],
     },
     {

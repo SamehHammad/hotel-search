@@ -52,11 +52,12 @@ const useHotelsStore = create<HotelsState>((set, get) => ({
                     newFilters.guests.children !== currentGuests.children)) ||
             (newFilters.rooms !== undefined &&
                 JSON.stringify(newFilters.rooms) !== JSON.stringify(currentRooms)) ||
-            newFilters.min_price !== undefined ||
-            newFilters.max_price !== undefined ||
-            newFilters.hotel_stars !== undefined ||
-            newFilters.amenities !== undefined ||
-            newFilters.property_name !== undefined;
+            (newFilters.min_price !== undefined && newFilters.min_price !== state.filters.min_price) ||
+            (newFilters.max_price !== undefined && newFilters.max_price !== state.filters.max_price) ||
+            (newFilters.hotel_stars !== undefined && JSON.stringify(newFilters.hotel_stars) !== JSON.stringify(state.filters.hotel_stars)) ||
+            (newFilters.amenities !== undefined && JSON.stringify(newFilters.amenities) !== JSON.stringify(state.filters.amenities)) ||
+            (newFilters.property_name !== undefined && newFilters.property_name !== state.filters.property_name) ||
+            (newFilters.is_wishlist !== undefined && newFilters.is_wishlist !== state.filters.is_wishlist);
 
         set((state) => {
             const nextFilters = { ...state.filters, ...newFilters, page: 1 };

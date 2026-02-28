@@ -15,14 +15,17 @@ export function HotelList() {
     const t = useTranslations("hotels");
     const tCommon = useTranslations("common");
 
+    //---** Extract data and loading state from the hotels hook **---//
     const { hotels, loading, error, isFetchingMore, pagination, appendHotels } = useHotels();
 
+    //---** Check for active search queries in the URL **---//
     const searchParams = useSearchParams();
     const hasSearchQuery = !!searchParams.get("q");
 
+    //---** Determine if more records are available for fetching **---//
     const hasMore = !!pagination.next_page_token;
 
-    // Infinite Scroll hook
+    //---** Infinite Scroll hook: Triggers data fetch on scroll threshold **---//
     const { sentinelRef } = useInfiniteScroll({
         onLoadMore: appendHotels,
         hasMore,
@@ -30,6 +33,7 @@ export function HotelList() {
         threshold: 0.5,
     });
 
+    //---** Error state: Display error message and retry button **---//
     if (error) {
         return (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -47,7 +51,7 @@ export function HotelList() {
         );
     }
 
-    // Initial load
+    //---** Loading state: Display placeholder skeletons during initial fetch **---//
     if (loading && hotels.length === 0) {
         return (
             <div className="space-y-6">
@@ -58,7 +62,7 @@ export function HotelList() {
         );
     }
 
-    // Empty state
+    //---** Empty state: Display helpful message when no hotels match search **---//
     if (!loading && hotels.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -74,15 +78,16 @@ export function HotelList() {
                         : t("searchPrompt")
                     }
                 </p>
-
             </div>
         );
     }
 
     return (
         <div className="flex flex-col">
+            {/*---** Filter chips and sorting controls header **---*/}
             <HotelFilterChips />
 
+            {/*---** Render list of hotel cards based on search results **---*/}
             <div className="space-y-6">
                 {hotels.map((hotel: import("@/types/hotel.types").Hotel, index: number) => (
                     <HotelCard
@@ -91,7 +96,7 @@ export function HotelList() {
                     />
                 ))}
 
-                {/* Infinite Scroll Sentinel */}
+                {/*---** Infinite Scroll Sentinel: Observes for lazy loading triggers **---*/}
                 <div ref={sentinelRef} className="h-10 w-full flex items-center justify-center mt-6 mb-12">
                     {isFetchingMore && (
                         <div className="flex items-center gap-3 text-indigo-600 font-medium">

@@ -3,7 +3,7 @@ import { SearchFilters } from "@/types/search.types";
 export const BEARER_TOKEN = "hotel_secure_token_123";
 
 export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
-    q: "New York Hotels",
+    q: "New York",
     guests: { adults: 2, children: 0 },
     rooms: [{ adults: 2, children: 0 }],
     page: 1,

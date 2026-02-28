@@ -2,6 +2,7 @@
 
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Plus, Minus, Users, ChevronDown } from "lucide-react";
 import {
@@ -12,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { RoomConfig } from "@/types/search.types";
-import { useState } from "react";
 
 interface GuestsSelectorProps {
     rooms: RoomConfig[];
@@ -29,6 +29,7 @@ export function GuestsSelector({
     const ts = useTranslations("search");
     const [open, setOpen] = useState(false);
 
+    //---** Derived summary stats for display in the main trigger button **---//
     const totalAdults = rooms.reduce((acc, room) => acc + room.adults, 0);
     const totalChildren = rooms.reduce((acc, room) => acc + room.children, 0);
     const totalTravellers = totalAdults + totalChildren;
@@ -36,18 +37,21 @@ export function GuestsSelector({
 
     const isMinimal = variant === "minimal";
 
+    //---** Update specific room configuration without mutating state **---//
     const updateRoom = (index: number, adults: number, children: number) => {
         const newRooms = [...rooms];
         newRooms[index] = { adults, children };
         onRoomsChange(newRooms);
     };
 
+    //---** Add a new room with default configuration, capped at 8 rooms **---//
     const addRoom = () => {
         if (rooms.length < 8) {
             onRoomsChange([...rooms, { adults: 1, children: 0 }]);
         }
     };
 
+    //---** Remove specified room index from the collection **---//
     const removeRoom = (index: number) => {
         if (rooms.length > 1) {
             const newRooms = rooms.filter((_, i) => i !== index);
@@ -57,12 +61,15 @@ export function GuestsSelector({
 
     return (
         <div className={cn("flex flex-col gap-1.5 w-full", !isMinimal && "flex-1 sm:min-w-[160px]")}>
+            {/*---** Optional label for standard layouts **---*/}
             {!isMinimal && (
                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ps-1">
                     {ts("guestsLabel")}
                 </label>
             )}
+
             <Popover open={open} onOpenChange={setOpen}>
+                {/*---** Interactive trigger button with summary of rooms and guests **---*/}
                 <PopoverTrigger asChild>
                     <Button
                         variant={isMinimal ? "ghost" : "outline"}
@@ -101,12 +108,7 @@ export function GuestsSelector({
                     </Button>
                 </PopoverTrigger>
 
-                {/*
-                  * Key fix: use a flex-column layout with a capped height.
-                  * The header + footer are shrink-0 (pinned).
-                  * The scrollable room list is flex-1 overflow-y-auto.
-                  * We cap the whole popover so it never overflows the viewport.
-                  */}
+                {/*---** Overlay Content: Manages room-by-room occupant counts with scrollable container **---*/}
                 <PopoverContent
                     className="w-[340px] p-0 rounded-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-slate-100 overflow-hidden bg-white z-[120]"
                     style={{ maxHeight: "min(350px, calc(100dvh - 150px))", display: "flex", flexDirection: "column" }}
@@ -115,7 +117,7 @@ export function GuestsSelector({
                     avoidCollisions={true}
                     collisionPadding={16}
                 >
-                    {/* ── Pinned Header ── */}
+                    {/*---** Pinned Header showing total summary **---*/}
                     <div className="bg-[#051c34] px-5 py-3.5 text-white shrink-0">
                         <h3 className="text-base font-black tracking-tight flex items-center gap-2">
                             <Users className="w-4 h-4 text-indigo-300" />
@@ -126,12 +128,11 @@ export function GuestsSelector({
                         </p>
                     </div>
 
-                    {/* ── Scrollable Room List ── */}
+                    {/*---** Interactive Room Settings: List of increment/decrement counters **---*/}
                     <div className="flex-1 overflow-y-auto overscroll-contain min-h-0">
                         <div className="divide-y divide-slate-100">
                             {rooms.map((room, index) => (
                                 <div key={index} className="px-5 py-4 space-y-3.5">
-                                    {/* Room header row */}
                                     <div className="flex items-center justify-between">
                                         <h4 className="font-black text-[#051c34] text-sm tracking-tight">
                                             {t("roomNumber", { number: index + 1 })}
@@ -148,7 +149,7 @@ export function GuestsSelector({
                                     </div>
 
                                     <div className="space-y-3">
-                                        {/* Adults */}
+                                        {/*---** Adult count controls for current room **---*/}
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="font-bold text-slate-800 text-sm">{ts("adultsLabel")}</p>
@@ -178,7 +179,7 @@ export function GuestsSelector({
                                             </div>
                                         </div>
 
-                                        {/* Children */}
+                                        {/*---** Child count controls for current room **---*/}
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <p className="font-bold text-slate-800 text-sm">{ts("childrenLabel")}</p>
@@ -212,7 +213,7 @@ export function GuestsSelector({
                             ))}
                         </div>
 
-                        {/* Add Room Button */}
+                        {/*---** CTA to append additional room configurations **---*/}
                         {rooms.length < 8 && (
                             <div className="px-5 pb-4 pt-2">
                                 <button
@@ -229,7 +230,7 @@ export function GuestsSelector({
                         )}
                     </div>
 
-                    {/* ── Pinned Footer with Apply Button ── */}
+                    {/*---** Pinned Footer bar containing dismissal actions **---*/}
                     <div className="px-5 py-3.5 border-t border-slate-100 bg-white flex items-center justify-between gap-3 shrink-0">
                         <p className="text-[11px] text-slate-400 font-medium leading-tight">
                             {totalRooms} {totalRooms > 1 ? t("rooms") : t("room")} &middot; {totalTravellers} {ts("travellers")}

@@ -1,7 +1,32 @@
 import type { Hotel } from "@/types/hotel.types";
 
+//---** Global collection of high-resolution hotel placeholder images **---//
+export const MOCK_HOTEL_IMAGES = [
+    { thumbnail: "/hotels/h1.webp", original: "/hotels/h1.webp" },
+    { thumbnail: "/hotels/h2.webp", original: "/hotels/h2.webp" },
+    { thumbnail: "/hotels/h3.webp", original: "/hotels/h3.webp" },
+    { thumbnail: "/hotels/h4.webp", original: "/hotels/h4.webp" },
+    { thumbnail: "/hotels/h5.webp", original: "/hotels/h5.webp" },
+    { thumbnail: "/hotels/h6.webp", original: "/hotels/h6.webp" },
+    { thumbnail: "/hotels/h7.webp", original: "/hotels/h7.webp" },
+    { thumbnail: "/hotels/h8.webp", original: "/hotels/h8.webp" },
+    { thumbnail: "/hotels/h9.webp", original: "/hotels/h9.webp" },
+    { thumbnail: "/hotels/h10.webp", original: "/hotels/h10.webp" },
+    { thumbnail: "/hotels/h11.webp", original: "/hotels/h11.webp" },
+];
+
+//---** Logic to retrieve a deterministic set of images based on property token **---//
+export function getHotelImages(token: string) {
+    if (!token) return MOCK_HOTEL_IMAGES.slice(0, 5);
+    //---** Create a deterministic start index based on string length & char codes **---//
+    const hash = Array.from(token).reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    const startIdx = hash % (MOCK_HOTEL_IMAGES.length - 5);
+    return MOCK_HOTEL_IMAGES.slice(startIdx, startIdx + 5);
+}
+
+//---** Static list of diverse mock hotels for development and testing **---//
 export const MOCK_HOTELS: Hotel[] = [
-    // --- Cairo, Egypt ---
+    //---** Cairo, Egypt - Premier Nile and Pyramid locations **---//
     {
         type: "hotel",
         property_token: "cairo_1",
@@ -33,7 +58,7 @@ export const MOCK_HOTELS: Hotel[] = [
         images: [{ thumbnail: "https://lh3.googleusercontent.com/p/AF1QipM6_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s287", original: "https://lh5.googleusercontent.com/p/AF1QipM6_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s10000" }],
     },
 
-    // --- New York, US ---
+    //---** New York, US - Iconic urban landmarks **---//
     {
         type: "hotel",
         property_token: "nyc_1",
@@ -50,7 +75,7 @@ export const MOCK_HOTELS: Hotel[] = [
         images: [{ thumbnail: "https://lh3.googleusercontent.com/p/AF1QipO9_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s287", original: "https://lh5.googleusercontent.com/p/AF1QipO9_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s10000" }],
     },
 
-    // --- London, GB ---
+    //---** London, GB - Heritage and riverfront views **---//
     {
         type: "hotel",
         property_token: "london_1",
@@ -67,7 +92,7 @@ export const MOCK_HOTELS: Hotel[] = [
         images: [{ thumbnail: "https://lh3.googleusercontent.com/p/AF1QipL8_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s287", original: "https://lh5.googleusercontent.com/p/AF1QipL8_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s10000" }],
     },
 
-    // --- Dubai, AE ---
+    //---** Dubai, AE - Symbols of modern architectural luxury **---//
     {
         type: "hotel",
         property_token: "dubai_1",
@@ -84,7 +109,7 @@ export const MOCK_HOTELS: Hotel[] = [
         images: [{ thumbnail: "https://lh3.googleusercontent.com/p/AF1QipK7_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s287", original: "https://lh5.googleusercontent.com/p/AF1QipK7_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s10000" }],
     },
 
-    // --- Riyadh, SA ---
+    //---** Riyadh, SA - Palatial desert retreats **---//
     {
         type: "hotel",
         property_token: "riyadh_1",
@@ -101,7 +126,7 @@ export const MOCK_HOTELS: Hotel[] = [
         images: [{ thumbnail: "https://lh3.googleusercontent.com/p/AF1QipJ6_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s287", original: "https://lh5.googleusercontent.com/p/AF1QipJ6_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s10000" }],
     },
 
-    // --- Paris, FR ---
+    //---** Paris, FR - European elegance and history **---//
     {
         type: "hotel",
         property_token: "paris_1",
@@ -118,7 +143,7 @@ export const MOCK_HOTELS: Hotel[] = [
         images: [{ thumbnail: "https://lh3.googleusercontent.com/p/AF1QipI5_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s287", original: "https://lh5.googleusercontent.com/p/AF1QipI5_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s10000" }],
     },
 
-    // --- Tokyo, JP ---
+    //---** Tokyo, JP - Minimalist luxury with skyline panoramas **---//
     {
         type: "hotel",
         property_token: "tokyo_1",
@@ -135,7 +160,7 @@ export const MOCK_HOTELS: Hotel[] = [
         images: [{ thumbnail: "https://lh3.googleusercontent.com/p/AF1QipH4_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s287", original: "https://lh5.googleusercontent.com/p/AF1QipH4_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s10000" }],
     },
 
-    // --- Istanbul, TR ---
+    //---** Istanbul, TR - Imperial palace charms by the water **---//
     {
         type: "hotel",
         property_token: "istanbul_1",
@@ -152,7 +177,7 @@ export const MOCK_HOTELS: Hotel[] = [
         images: [{ thumbnail: "https://lh3.googleusercontent.com/p/AF1QipG3_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s287", original: "https://lh5.googleusercontent.com/p/AF1QipG3_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s10000" }],
     },
 
-    // --- Jeddah, SA ---
+    //---** Jeddah, SA - Red Sea vistas and palatial hospitality **---//
     {
         type: "hotel",
         property_token: "jeddah_1",
@@ -169,7 +194,7 @@ export const MOCK_HOTELS: Hotel[] = [
         images: [{ thumbnail: "https://lh3.googleusercontent.com/p/AF1QipF2_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s287", original: "https://lh5.googleusercontent.com/p/AF1QipF2_z_Yw8vW7_wJ6t3z9z1z2z3z4z5z6z7=s10000" }],
     },
 
-    // --- Marrakech, MA ---
+    //---** Marrakech, MA - Historic Moroccan royal garden settings **---//
     {
         type: "hotel",
         property_token: "marrakech_1",
@@ -187,6 +212,7 @@ export const MOCK_HOTELS: Hotel[] = [
     },
 ];
 
+//---** Dynamic generator for procedural hotel data based on location constraints **---//
 export function generateMoreHotels(
     page: number,
     city: string = "New York",
