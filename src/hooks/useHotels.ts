@@ -39,6 +39,13 @@ export function useHotels() {
 
     const searchParams = useSearchParams();
 
+    // ---** Separate effect for unmount cleanup ONLY **---//
+    useEffect(() => {
+        return () => {
+            resetHotels();
+        };
+    }, [resetHotels]);
+
     useEffect(() => {
         const q = searchParams.get("q");
 
@@ -60,6 +67,11 @@ export function useHotels() {
             west: parseFloat(boundsParam.split(",")[3]),
         } : null;
 
+        // Sync local bounds to store so map doesn't re-trigger fitBounds
+        if (bounds && !mapBounds) {
+            useHotelsStore.getState().setBounds(bounds);
+        }
+
         setFilters({
             q,
             check_in_date: searchParams.get("check_in_date") || undefined,
@@ -69,10 +81,6 @@ export function useHotels() {
         });
 
         fetchHotels();
-
-        return () => {
-            resetHotels();
-        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchParams]);
 

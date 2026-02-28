@@ -10,7 +10,10 @@
     "nav": {
         "home": "Home",
         "search": "Search",
-        "hotels": "Hotels"
+        "hotels": "Hotels",
+        "flights": "Flights",
+        "cars": "Cars",
+        "tours": "Tours"
     },
     "search": {
         "title": "Find Your Perfect Hotel",

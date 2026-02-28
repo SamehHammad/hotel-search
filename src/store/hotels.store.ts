@@ -95,11 +95,11 @@ const useHotelsStore = create<HotelsState>((set, get) => ({
         }
     },
 
-    // ---** Update map bounds and trigger hotels refetch **---//
+    // ---** Update map bounds state **---//
     setBounds: (bounds) => {
         const current = get().mapBounds;
 
-        // Shallow comparison to prevent unnecessary refetches
+        // Shallow comparison to prevent unnecessary state updates
         if (
             bounds &&
             current &&
@@ -112,8 +112,8 @@ const useHotelsStore = create<HotelsState>((set, get) => ({
         }
 
         set({ mapBounds: bounds });
-        get().setFilters({ bounds });
-        get().fetchHotels();
+        // We don't call fetchHotels here anymore, because useHotels hook 
+        // will pick up the URL change (triggered in useMapBounds) and fetch.
     },
 
     // ---** Reset all hotels state **---//

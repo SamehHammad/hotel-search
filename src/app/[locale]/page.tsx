@@ -1,8 +1,8 @@
 //---** Homepage route serving the hero section **---//
 
 import { useTranslations } from "next-intl";
-import { HeroSection } from "@/components/shared/HeroSection";
 import { Navbar } from "@/components/shared/Navbar";
+import { HeroSlider } from "@/components/shared/HeroSlider";
 
 export default function Home() {
     const t = useTranslations("common");
@@ -12,7 +12,7 @@ export default function Home() {
             <Navbar />
 
             <main className="flex-1">
-                <HeroSection />
+                <HeroSlider />
 
                 {/* Placeholder for promotional cards / features */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-32 mb-20 text-center">

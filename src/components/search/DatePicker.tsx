@@ -24,9 +24,18 @@ interface DatePickerProps {
 
 export function DatePicker({ date, onSelect, label, minDate }: DatePickerProps) {
     const t = useTranslations("search");
+    const [isMobile, setIsMobile] = React.useState(false);
+
+    React.useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener("resize", checkMobile);
+        return () => window.removeEventListener("resize", checkMobile);
+    }, []);
+
     return (
-        <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
-            <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider ps-1">
+        <div className="flex flex-col gap-1.5 flex-1 w-full sm:min-w-[160px]">
+            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ps-1">
                 {label}
             </label>
             <Popover>
@@ -34,20 +43,26 @@ export function DatePicker({ date, onSelect, label, minDate }: DatePickerProps) 
                     <Button
                         variant={"outline"}
                         className={cn(
-                            "w-full justify-start text-start font-medium h-12 bg-white rounded-xl shadow-sm hover:bg-slate-50",
-                            !date && "text-muted-foreground font-normal"
+                            "w-full justify-start text-start font-bold h-12 bg-white rounded-xl shadow-sm border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-sm",
+                            !date && "text-slate-400 font-medium"
                         )}
                     >
-                        <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-indigo-500" />
-                        {date ? format(date, "PPP") : <span>{label}</span>}
+                        <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-primary" />
+                        {date ? format(date, "MMM dd, yyyy") : <span>{label}</span>}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 rounded-xl shadow-lg border-slate-100" align="start">
+                <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-slate-100 overflow-hidden" align="start">
+                    <div className="bg-primary p-4 text-white">
+                        <p className="text-xs font-bold uppercase opacity-80 tracking-widest">{label}</p>
+                        <p className="text-xl font-bold">{date ? format(date, "EEEE, MMM dd") : "Select a date"}</p>
+                    </div>
                     <Calendar
                         mode="single"
                         selected={date}
                         onSelect={onSelect}
                         initialFocus
+                        numberOfMonths={isMobile ? 1 : 2}
+                        className="p-3"
                         disabled={(date) => {
                             if (minDate) {
                                 const checkMin = new Date(minDate);
@@ -59,6 +74,11 @@ export function DatePicker({ date, onSelect, label, minDate }: DatePickerProps) 
                             return date < today;
                         }}
                     />
+                    <div className="p-3 border-t border-slate-50 flex justify-end">
+                        <Button variant="ghost" size="sm" className="text-primary font-bold hover:bg-primary/5 rounded-lg" onClick={() => onSelect(undefined)}>
+                            Clear
+                        </Button>
+                    </div>
                 </PopoverContent>
             </Popover>
         </div>
