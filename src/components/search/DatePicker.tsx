@@ -60,6 +60,7 @@ export function DatePicker({ date, onSelect, label, minDate, variant = "default"
                                 : "w-full justify-start text-start font-bold h-12 bg-surface rounded-xl shadow-sm border-border hover:border-primary hover:bg-primary/5 transition-all text-sm",
                             !isValidDate(date) && "text-brand-muted/60 font-medium"
                         )}
+                        aria-label={`${label}: ${isValidDate(date) ? format(date, "MMM dd") : t("selectDate")}`}
                     >
                         {!isMinimal && <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-primary" />}
                         {isValidDate(date) ? format(date, "MMM dd") : <span>{label}</span>}

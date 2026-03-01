@@ -202,8 +202,8 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     return (
         <div className={cn(
             "flex flex-col gap-6 w-full transition-all duration-300",
-            !isHeader && "bg-surface p-6 sm:p-8 rounded-4xl shadow-2xl border border-border",
-            isHeader && "bg-surface p-0",
+            !isHeader && "p-6 sm:p-8 rounded-4xl",
+            isHeader && "p-0",
             className
         )}>
             {/*---** Form container orchestrating the primary search inputs with responsive grid **---*/}
@@ -221,24 +221,34 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                         </label>
                         <div className="relative w-full" ref={suggestionsRef}>
                             <Input
+                                id="location-search"
                                 value={location}
                                 onChange={(e) => handleLocationChange(e.target.value)}
                                 onFocus={() => location.length >= 2 && setShowSuggestions(suggestions.length > 0)}
                                 placeholder={t("locationPlaceholder")}
-                                className="h-8 p-0 text-start border-none shadow-none focus-visible:ring-0 font-bold text-brand-muted text-[15px] placeholder:text-brand-muted/50 placeholder:font-normal"
+                                className="h-8 px-2 text-start border-none shadow-none focus-visible:ring-0 font-bold text-brand-muted text-[15px] placeholder:text-brand-muted/50 placeholder:font-normal"
                                 required
                                 autoComplete="off"
+                                role="combobox"
+                                aria-label={t("locationLabel")}
+                                aria-autocomplete="list"
+                                aria-expanded={showSuggestions}
+                                aria-haspopup="listbox"
+                                aria-controls="location-suggestions"
+                                aria-owns="location-suggestions"
                             />
                             {/*---** Fuzzy search suggestions dropdown results **---*/}
                             {showSuggestions && (
                                 <div className="absolute top-[calc(100%+12px)] start-[-16px] end-[-16px] bg-surface rounded-2xl shadow-2xl border border-border py-3 z-[110] overflow-hidden">
-                                    <div className="max-h-[300px] overflow-y-auto px-2">
+                                    <ul id="location-suggestions" role="listbox" className="max-h-[300px] overflow-y-auto px-2 list-none m-0 p-0">
                                         {suggestions.map((city) => (
-                                            <button
+                                            <li
                                                 key={city.id}
-                                                type="button"
+                                                id={`suggestion-${city.id}`}
+                                                role="option"
+                                                aria-selected={false}
                                                 onClick={() => handleSelectSuggestion(city, `${city.name}, ${city.country}`)}
-                                                className="w-full px-4 py-3 flex items-center gap-4 hover:bg-surface-muted rounded-xl transition-all text-left group"
+                                                className="w-full px-4 py-3 flex items-center gap-4 hover:bg-surface-muted rounded-xl transition-all text-left cursor-pointer group"
                                             >
                                                 <div className="bg-surface-muted p-2.5 rounded-xl text-brand-muted group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                                     <MapPin className="h-5 w-5" />
@@ -247,9 +257,9 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                                                     <div className="font-bold text-brand-dark text-sm group-hover:text-primary">{city.name}</div>
                                                     <div className="text-[11px] text-brand-muted font-medium">{city.country}</div>
                                                 </div>
-                                            </button>
+                                            </li>
                                         ))}
-                                    </div>
+                                    </ul>
                                 </div>
                             )}
                         </div>
@@ -311,6 +321,7 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
 
                         <Button
                             type="submit"
+                            aria-label={t("searchButton")}
                             className={cn(
                                 "rounded-2xl lg:rounded-full p-0 flex items-center justify-center bg-primary hover:bg-primary-hover shadow-xl transition-all hover:scale-105 active:scale-95 shrink-0",
                                 isHeader ? "w-[56px] h-[56px] lg:w-[56px] lg:h-[56px]" : "w-20 h-20 lg:w-16 lg:h-16",

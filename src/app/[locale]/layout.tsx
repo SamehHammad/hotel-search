@@ -14,10 +14,30 @@ const cairo = Cairo({
     display: "swap",
 });
 
-//---** Static metadata for the application **---//
-export const metadata: Metadata = {
-    title: "HotelSearch | Find Your Perfect Hotel",
-    description: "Search and discover thousands of beautiful hotels world-wide",
+import { getTranslations } from "next-intl/server";
+import { buildMetadata } from "@/lib/seo";
+
+//---** Generate dynamic SEO metadata for the root layout **---//
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
+    const t = await getTranslations({ locale });
+
+    return buildMetadata({
+        title: t("common.appName"),
+        description: t("common.appDescription"),
+        path: "",
+        locale,
+    });
+}
+
+export const viewport = {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5, // Allow zooming for accessibility
+    themeColor: [
+        { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+        { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+    ],
 };
 
 //---** Generate static parameters for available locales **---//

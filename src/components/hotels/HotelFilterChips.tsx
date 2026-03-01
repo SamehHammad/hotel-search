@@ -75,6 +75,7 @@ export function HotelFilterChips() {
                         <button
                             onClick={() => handleRemoveFilter(filter)}
                             className="bg-surface-muted group-hover:bg-brand-light p-0.5 rounded-full text-brand-muted/70 hover:text-brand-dark transition-colors"
+                            aria-label={`${t("clearAll")} ${filter.label}`}
                         >
                             <X className="w-3.5 h-3.5" />
                         </button>
@@ -104,10 +105,10 @@ export function HotelFilterChips() {
             </div>
 
             {/*---** Results count and sorting dropdown row **---*/}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
                 <div className="space-y-0.5">
                     <h2 className="text-xl font-bold text-brand-dark tracking-tight flex items-center gap-3">
-                        {pagination.records_to || hotels.length}+ {t("properties")}
+                        <span className="text-white font-bold text-xl bg-primary px-2 py-1 rounded-full">{hotels.length}+</span> {t("properties")}
                     </h2>
                     <div className="flex items-center gap-1.5 text-xs text-brand-muted/70 font-medium lowercase">
                         <span>{t("sortOrder")}</span>

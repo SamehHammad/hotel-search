@@ -212,6 +212,12 @@ export const MOCK_HOTELS: Hotel[] = [
     },
 ];
 
+//---** Deterministic pseudo-random number in [0,1) seeded by integer — ensures stable GPS coords **---//
+function seededRandom(seed: number): number {
+    const x = Math.sin(seed + 1) * 43758.5453123;
+    return x - Math.floor(x);
+}
+
 //---** Dynamic generator for procedural hotel data based on location constraints **---//
 export function generateMoreHotels(
     page: number,
@@ -232,53 +238,60 @@ export function generateMoreHotels(
         "Combining modern comfort with timeless character.",
     ];
 
-    return names.map((name, i) => ({
-        type: "hotel" as const,
-        property_token: `mock_page${page}_token_${city.replace(/\s+/g, '_')}_${i}`,
-        name: `${name} ${city} ${i + 1}`,
-        description: descriptions[i % descriptions.length],
-        gps_coordinates: {
-            latitude: lat + (Math.random() - 0.5) * 0.1,
-            longitude: lng + (Math.random() - 0.5) * 0.1,
-        },
-        city,
-        country,
-        check_in_time: i % 2 === 0 ? "3:00 PM" : "2:00 PM",
-        check_out_time: i % 2 === 0 ? "12:00 PM" : "11:00 AM",
-        price_per_night: {
-            price: `$${150 + i * 20 + page * 10}`,
-            extracted_price: 150 + i * 20 + page * 10,
-            price_before_taxes: `$${130 + i * 18 + page * 8}`,
-            extracted_price_before_taxes: 130 + i * 18 + page * 8,
-        },
-        total_price: {
-            price: `$${(150 + i * 20 + page * 10) * 6}`,
-            extracted_price: (150 + i * 20 + page * 10) * 6,
-            price_before_taxes: `$${(130 + i * 18 + page * 8) * 6}`,
-            extracted_price_before_taxes: (130 + i * 18 + page * 8) * 6,
-        },
-        hotel_class: `${Math.floor(3.8 + (i % 2) * 1.2)}-star hotel`,
-        extracted_hotel_class: Math.floor(3.8 + (i % 2) * 1.2),
-        rating: Math.round((3.8 + Math.random() * 1.2) * 10) / 10,
-        reviews: Math.floor(100 + Math.random() * 5000),
-        location_rating: Math.round((4.0 + Math.random() * 1.0) * 10) / 10,
-        airport_access_rating: Math.round((3.8 + Math.random() * 1.2) * 10) / 10,
-        amenities: [
-            "Free Wi-Fi",
-            "Breakfast",
-            "Pool",
-            "Free Parking",
-            "Airport Shuttle",
-            "Fitness center",
-            "Restaurant",
-            "Air conditioning"
-        ].slice(0, 5 + (i % 4)),
-        images: [
-            {
-                thumbnail: "https://lh3.googleusercontent.com/p/AF1QipNWJQfQecgQ7OdiDozN6xDereE9PGz8PmNwRUbH=s287",
-                original: "https://lh5.googleusercontent.com/p/AF1QipNWJQfQecgQ7OdiDozN6xDereE9PGz8PmNwRUbH=s10000",
+    return names.map((name, i) => {
+        //---** Use deterministic seed so the same hotel always gets the same coordinates **---//
+        const seed = page * 1000 + i;
+        const latOffset = (seededRandom(seed) - 0.5) * 0.12;
+        const lngOffset = (seededRandom(seed + 50) - 0.5) * 0.12;
+
+        return ({
+            type: "hotel" as const,
+            property_token: `mock_page${page}_token_${city.replace(/\s+/g, '_')}_${i}`,
+            name: `${name} ${city} ${i + 1}`,
+            description: descriptions[i % descriptions.length],
+            gps_coordinates: {
+                latitude: lat + latOffset,
+                longitude: lng + lngOffset,
             },
-        ],
-        nearby_places: [],
-    }));
+            city,
+            country,
+            check_in_time: i % 2 === 0 ? "3:00 PM" : "2:00 PM",
+            check_out_time: i % 2 === 0 ? "12:00 PM" : "11:00 AM",
+            price_per_night: {
+                price: `$${150 + i * 20 + page * 10}`,
+                extracted_price: 150 + i * 20 + page * 10,
+                price_before_taxes: `$${130 + i * 18 + page * 8}`,
+                extracted_price_before_taxes: 130 + i * 18 + page * 8,
+            },
+            total_price: {
+                price: `$${(150 + i * 20 + page * 10) * 6}`,
+                extracted_price: (150 + i * 20 + page * 10) * 6,
+                price_before_taxes: `$${(130 + i * 18 + page * 8) * 6}`,
+                extracted_price_before_taxes: (130 + i * 18 + page * 8) * 6,
+            },
+            hotel_class: `${Math.floor(3.8 + (i % 2) * 1.2)}-star hotel`,
+            extracted_hotel_class: Math.floor(3.8 + (i % 2) * 1.2),
+            rating: Math.round((3.8 + seededRandom(seed + 100) * 1.2) * 10) / 10,
+            reviews: Math.floor(100 + seededRandom(seed + 200) * 5000),
+            location_rating: Math.round((4.0 + seededRandom(seed + 300) * 1.0) * 10) / 10,
+            airport_access_rating: Math.round((3.8 + seededRandom(seed + 400) * 1.2) * 10) / 10,
+            amenities: [
+                "Free Wi-Fi",
+                "Breakfast",
+                "Pool",
+                "Free Parking",
+                "Airport Shuttle",
+                "Fitness center",
+                "Restaurant",
+                "Air conditioning"
+            ].slice(0, 5 + (i % 4)),
+            images: [
+                {
+                    thumbnail: "https://lh3.googleusercontent.com/p/AF1QipNWJQfQecgQ7OdiDozN6xDereE9PGz8PmNwRUbH=s287",
+                    original: "https://lh5.googleusercontent.com/p/AF1QipNWJQfQecgQ7OdiDozN6xDereE9PGz8PmNwRUbH=s10000",
+                },
+            ],
+            nearby_places: [],
+        });
+    });
 }

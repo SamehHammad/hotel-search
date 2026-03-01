@@ -22,9 +22,10 @@ import { getHotelImages } from "@/data/mockHotels";
 
 interface HotelCardProps {
     hotel: Hotel;
+    priority?: boolean;
 }
 
-export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
+export const HotelCard = memo(function HotelCard({ hotel, priority }: HotelCardProps) {
     const t = useTranslations("hotels");
     const [activeImage, setActiveImage] = useState(0);
     const { toggleWishlist, isInWishlist } = useWishlistStore();
@@ -45,10 +46,10 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
     const nights = useMemo(() => {
         if (filters.check_in_date && filters.check_out_date) {
             try {
-                const diff = differenceInCalendarDays(
-                    parseISO(filters.check_out_date),
-                    parseISO(filters.check_in_date)
-                );
+                const d1 = parseISO(filters.check_in_date);
+                const d2 = parseISO(filters.check_out_date);
+                if (isNaN(d1.getTime()) || isNaN(d2.getTime())) return 1;
+                const diff = differenceInCalendarDays(d2, d1);
                 return Math.max(1, diff);
             } catch { return 1; }
         }
@@ -56,8 +57,19 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
     }, [filters.check_in_date, filters.check_out_date]);
 
     //---** Format check-in and check-out dates for display **---//
-    const checkInLabel = filters.check_in_date ? format(parseISO(filters.check_in_date), "MMM d") : null;
-    const checkOutLabel = filters.check_out_date ? format(parseISO(filters.check_out_date), "MMM d") : null;
+    const safeFormat = (dateStr: string | undefined | null) => {
+        if (!dateStr) return null;
+        try {
+            const date = parseISO(dateStr);
+            if (isNaN(date.getTime())) return null;
+            return format(date, "MMM d");
+        } catch {
+            return null;
+        }
+    };
+
+    const checkInLabel = safeFormat(filters.check_in_date);
+    const checkOutLabel = safeFormat(filters.check_out_date);
 
     //---** Pricing calculations based on nightly rate and guest count **---//
     const nightlyPriceRaw = hotel.price_per_night?.extracted_price ?? 0;
@@ -99,20 +111,15 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                 overflow-hidden mb-5
             ">
                 {/*---** IMAGE PANEL: Displays hotel photos and wishlist toggle **---*/}
-                <div className="relative w-full sm:w-[240px] md:w-[280px] shrink-0 bg-surface-muted min-h-[200px] sm:min-h-0">
-                    {/*---** Blurred BG fallback **---*/}
-                    <div
-                        className="absolute inset-0 bg-cover bg-center opacity-30"
-                        style={{ backgroundImage: "url(/placeholder.jpg)" }}
-                    />
-
+                <div className="relative w-full sm:w-[240px] md:w-[280px] shrink-0 bg-surface-muted min-h-[200px] sm:min-h-0 overflow-hidden">
                     <Image
                         src={sanitizeImageUrl(images[activeImage].original || images[activeImage].thumbnail)}
-                        alt={hotel.name}
+                        alt={`${hotel.name} - ${hotel.city ?? ""}`}
                         fill
                         sizes="(max-width:640px) 100vw, 280px"
                         className="object-cover z-10 relative transition-transform duration-700 group-hover:scale-[1.03]"
-                        loading="lazy"
+                        priority={priority}
+                        loading={priority ? undefined : "lazy"}
                     />
 
                     {/*---** Wishlist toggle button **---*/}
@@ -132,18 +139,21 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                         <div className="min-w-0 flex-1">
                             {/*---** Hotel name **---*/}
                             <h3 className="text-[17px] font-extrabold text-brand-dark leading-snug tracking-tight hover:underline cursor-pointer">
-                                {hotel.name}
+                                <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-primary transition-colors">
+                                    {hotel.name}
+                                </a>
                             </h3>
                             {/*---** City + stars row **---*/}
                             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                 <span className="text-[13px] font-medium text-brand-muted">{hotel.city ?? "—"}</span>
                                 {hotel.rating && (
                                     <div className="flex items-center gap-0.5">
+                                        <span className="sr-only">{t("rating")}: {hotel.rating} {t("stars")}</span>
                                         {Array.from({ length: Math.floor(hotel.rating) }).map((_, i) => (
-                                            <Star key={`full-${i}`} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                            <Star key={`full-${i}`} className="w-3 h-3 fill-amber-400 text-amber-400" aria-hidden="true" />
                                         ))}
                                         {hotel.rating % 1 >= 0.5 && (
-                                            <div className="relative w-3 h-3">
+                                            <div className="relative w-3 h-3" aria-hidden="true">
                                                 <Star className="absolute inset-0 w-3 h-3 text-amber-400" />
                                                 <div className="absolute inset-0 overflow-hidden w-1/2">
                                                     <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
@@ -267,7 +277,7 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                         </div>
                     </div>
                 </div>
-            </article>
+            </article >
         </>
     );
 });

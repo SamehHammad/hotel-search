@@ -93,6 +93,7 @@ export function HotelList() {
                     <HotelCard
                         key={`${hotel.property_token}-${index}`}
                         hotel={hotel}
+                        priority={index < 2}
                     />
                 ))}
 

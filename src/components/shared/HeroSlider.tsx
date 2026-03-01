@@ -4,7 +4,7 @@
 
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade, Pagination } from "swiper/modules";
+import { Autoplay, EffectFade, Pagination, A11y } from "swiper/modules";
 import { useTranslations } from "next-intl";
 import { SearchForm } from "../search/SearchForm";
 
@@ -12,6 +12,7 @@ import { SearchForm } from "../search/SearchForm";
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
+import "swiper/css/a11y";
 
 const SLIDE_IMAGES = [
     "/slider/slider1.avif",
@@ -28,7 +29,7 @@ export function HeroSlider() {
             {/* Swiper Background */}
             <div className="absolute inset-0 z-0">
                 <Swiper
-                    modules={[Autoplay, EffectFade, Pagination]}
+                    modules={[Autoplay, EffectFade, Pagination, A11y]}
                     effect="fade"
                     autoplay={{
                         delay: 5000,
@@ -38,15 +39,20 @@ export function HeroSlider() {
                         clickable: true,
                         dynamicBullets: true,
                     }}
+                    a11y={{
+                        prevSlideMessage: t("slider.prev"),
+                        nextSlideMessage: t("slider.next"),
+                    }}
                     loop={true}
                     className="h-full w-full"
+                    aria-label={t("slider.ariaLabel")}
                 >
                     {SLIDE_IMAGES.map((src, index) => (
                         <SwiperSlide key={index}>
-                            <div className="relative w-full h-full">
+                            <div className="relative w-full h-full" role="group" aria-roledescription="slide" aria-label={t("slider.slideLabel", { index: index + 1, total: SLIDE_IMAGES.length })}>
                                 <Image
                                     src={src}
-                                    alt={`Luxury Hotel View ${index + 1}`}
+                                    alt={t("title")}
                                     fill
                                     priority={index === 0}
                                     className="object-cover"

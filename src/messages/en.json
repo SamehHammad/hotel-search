@@ -5,7 +5,11 @@
         "error": "Something went wrong",
         "retry": "Try Again",
         "noResults": "No hotels found",
-        "learnMore": "Learn More"
+        "learnMore": "Learn More",
+        "appDescription": "Search and discover thousands of beautiful hotels world-wide.",
+        "allRightsReserved": "All rights reserved.",
+        "privacy": "Privacy",
+        "terms": "Terms"
     },
     "nav": {
         "home": "Home",
@@ -50,6 +54,12 @@
             "checkInRequired": "Check-in date is required",
             "checkOutRequired": "Check-out date is required",
             "dateOrder": "Check-out must be after check-in"
+        },
+        "slider": {
+            "prev": "Previous slide",
+            "next": "Next slide",
+            "slideLabel": "Hotel slide {index} of {total}",
+            "ariaLabel": "Promotional hotel images"
         }
     },
     "hotels": {
@@ -202,11 +212,31 @@
         },
         "features": {
             "title": "Experience the Best",
-            "subtitle": "Everything you need for a perfect stay"
+            "subtitle": "Everything you need for a perfect stay",
+            "smart": {
+                "title": "Smart Search",
+                "desc": "Advanced algorithms that find the best properties matching your preferences in seconds."
+            },
+            "global": {
+                "title": "Global Reach",
+                "desc": "Access to over 2 million properties across 190 countries, from hotels to unique stays."
+            },
+            "security": {
+                "title": "Trusted Security",
+                "desc": "Your bookings and personal data are protected by industry-leading security protocols."
+            }
         },
         "popularHotels": {
             "title": "Popular Hotels",
-            "subtitle": "Trending properties our users love"
+            "subtitle": "Trending properties our users love",
+            "burj": "Burj Al Arab",
+            "dubai": "Dubai, UAE",
+            "ritz": "The Nile Ritz-Carlton",
+            "cairo": "Cairo, Egypt",
+            "plaza": "The Plaza Hotel",
+            "nyc": "New York, USA",
+            "savoy": "Savoy Hotel",
+            "london": "London, UK"
         }
     }
 }

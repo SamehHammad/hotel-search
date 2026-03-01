@@ -18,10 +18,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Map as MapIcon, X } from "lucide-react";
+import { useHotels } from "@/hooks/useHotels";
 
 export default function HotelsPageClient() {
     const t = useTranslations("hotels");
     const [isMapOpen, setIsMapOpen] = useState(false);
+    const { pagination, filters } = useHotels();
 
     return (
         <div className="flex flex-col h-screen bg-surface-muted overflow-hidden relative">
@@ -29,9 +31,9 @@ export default function HotelsPageClient() {
             <Navbar />
 
             {/*---** Top Header section containing the persistent search form **---*/}
-            <div className="bg-surface shadow-sm py-4 border-b border-border shrink-0 z-40">
+            <div className="py-4  shrink-0 z-40">
                 <div className="container mx-auto max-w-[1400px] px-4 md:px-6">
-                    <SearchForm variant="header" className="shadow-none border border-border bg-surface-muted -mb-2" />
+                    <SearchForm variant="header" className="shadow-none bg-p -mb-2" />
                 </div>
             </div>
 
@@ -42,7 +44,7 @@ export default function HotelsPageClient() {
                     <script
                         type="application/ld+json"
                         dangerouslySetInnerHTML={{
-                            __html: JSON.stringify(buildHotelListJsonLd("New York", 14542)),
+                            __html: JSON.stringify(buildHotelListJsonLd(filters.q || "properties", pagination.records_to || 0)),
                         }}
                     />
 

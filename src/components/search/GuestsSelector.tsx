@@ -79,6 +79,7 @@ export function GuestsSelector({
                                 ? "h-auto p-0 hover:bg-transparent justify-start gap-4 active:scale-[0.98]"
                                 : "justify-between font-bold h-12 bg-surface rounded-xl shadow-sm border-border hover:border-primary/50 hover:bg-primary/5 text-sm"
                         )}
+                        aria-label={`${ts("guestsLabel")}: ${totalTravellers} ${ts("travellers")}, ${totalRooms} ${t("rooms")}`}
                     >
                         <div className="flex items-center gap-3 overflow-hidden">
                             <div className={cn(
@@ -163,6 +164,7 @@ export function GuestsSelector({
                                                     className="h-8 w-8 rounded-full border-border bg-surface hover:border-primary hover:text-primary hover:bg-primary/5 transition-all shadow-sm active:scale-95"
                                                     onClick={() => updateRoom(index, Math.max(1, room.adults - 1), room.children)}
                                                     disabled={room.adults <= 1}
+                                                    aria-label={`Decrease adults in room ${index + 1}`}
                                                 >
                                                     <Minus className="h-3.5 w-3.5" />
                                                 </Button>
@@ -173,6 +175,7 @@ export function GuestsSelector({
                                                     size="icon"
                                                     className="h-8 w-8 rounded-full border-border bg-surface hover:border-primary hover:text-primary hover:bg-primary/5 transition-all shadow-sm active:scale-95"
                                                     onClick={() => updateRoom(index, room.adults + 1, room.children)}
+                                                    aria-label={`Increase adults in room ${index + 1}`}
                                                 >
                                                     <Plus className="h-3.5 w-3.5" />
                                                 </Button>
@@ -193,6 +196,7 @@ export function GuestsSelector({
                                                     className="h-8 w-8 rounded-full border-border bg-surface hover:border-primary hover:text-primary hover:bg-primary/5 transition-all shadow-sm active:scale-95"
                                                     onClick={() => updateRoom(index, room.adults, Math.max(0, room.children - 1))}
                                                     disabled={room.children <= 0}
+                                                    aria-label={`Decrease children in room ${index + 1}`}
                                                 >
                                                     <Minus className="h-3.5 w-3.5" />
                                                 </Button>
@@ -203,6 +207,7 @@ export function GuestsSelector({
                                                     size="icon"
                                                     className="h-8 w-8 rounded-full border-border bg-surface hover:border-primary hover:text-primary hover:bg-primary/5 transition-all shadow-sm active:scale-95"
                                                     onClick={() => updateRoom(index, room.adults, room.children + 1)}
+                                                    aria-label={`Increase children in room ${index + 1}`}
                                                 >
                                                     <Plus className="h-3.5 w-3.5" />
                                                 </Button>

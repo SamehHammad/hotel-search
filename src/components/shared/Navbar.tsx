@@ -75,13 +75,10 @@ export function Navbar() {
 
                 {/* Logo Section */}
                 <div className="flex items-center gap-8">
-                    <Link href={`/${locale}`} className="flex items-center gap-2 group shrink-0">
+                    <Link href={`/${locale}`} className="flex items-center gap-2 group shrink-0" aria-label={tCommon("appName")}>
                         <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-105 transition-all">
                             <Plane className={cn("w-6 h-6 transform transition-transform group-hover:rotate-12", isRtl ? "-rotate-45" : "rotate-45")} />
                         </div>
-                        {/* <span className="font-extrabold text-2xl tracking-tighter text-brand-dark hidden md:inline-block">
-                            {tCommon("appName")}
-                        </span> */}
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -99,6 +96,7 @@ export function Navbar() {
                                             ? "bg-primary/5 text-primary"
                                             : "text-brand-muted hover:bg-surface-muted hover:text-primary"
                                     )}
+                                    aria-current={isActive ? "page" : undefined}
                                 >
                                     <Icon className="w-4 h-4" />
                                     {link.label}
@@ -114,7 +112,7 @@ export function Navbar() {
                     {/* Language Switcher */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-2 rounded-full font-bold text-brand-muted">
+                            <Button aria-label="Select language" variant="ghost" size="sm" className="hidden sm:flex items-center gap-2 rounded-full font-bold text-brand-muted">
                                 <Globe className="w-4 h-4" />
                                 <span>{locale.toUpperCase()}</span>
                                 <ChevronDown className="w-3 h-3 opacity-50" />
@@ -142,6 +140,7 @@ export function Navbar() {
                         size="icon"
                         className="group rounded-full text-brand-muted hover:text-primary relative"
                         onClick={() => router.push(`/${locale}/hotels?wishlist=true`)}
+                        aria-label={`View wishlist, ${wishlistCount} items`}
                     >
                         <Heart className={cn("w-6 h-6 transition-all", wishlistCount > 0 ? "fill-red-500 text-red-500" : "")} />
                         {wishlistCount > 0 && (
@@ -154,7 +153,7 @@ export function Navbar() {
                     {/* User Profile Dropdown */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="relative flex items-center gap-2 rounded-full font-bold text-brand-muted hover:text-primary hover:bg-surface-muted transition-all p-1 pe-3">
+                            <Button aria-label="User profile menu" variant="ghost" className="relative flex items-center gap-2 rounded-full font-bold text-brand-muted hover:text-primary hover:bg-surface-muted transition-all p-1 pe-3">
                                 <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
                                     <UserCircle className="w-6 h-6" />
                                 </div>
@@ -194,6 +193,8 @@ export function Navbar() {
                         size="icon"
                         className="lg:hidden rounded-full"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                        aria-expanded={mobileMenuOpen}
                     >
                         {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
                     </Button>
