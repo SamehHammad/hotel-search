@@ -19,6 +19,11 @@ interface HotelsState {
 
     // Actions
     setFilters: (filters: Partial<SearchFilters>) => void;
+    hydrateFromServer: (payload: {
+        hotels: Hotel[];
+        pagination: Pagination;
+        filters: SearchFilters;
+    }) => void;
     fetchHotels: () => Promise<void>;
     appendHotels: () => Promise<void>;
     setBounds: (bounds: Bounds | null) => void;
@@ -74,6 +79,17 @@ const useHotelsStore = create<HotelsState>((set, get) => ({
                 mapBounds: isMajorChange ? null : state.mapBounds,
                 loading: isMajorChange ? false : state.loading,
             };
+        });
+    },
+
+    hydrateFromServer: ({ hotels, pagination, filters }) => {
+        set({
+            hotels,
+            pagination,
+            filters,
+            loading: false,
+            error: null,
+            isFetchingMore: false,
         });
     },
 

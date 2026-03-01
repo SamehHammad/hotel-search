@@ -114,10 +114,16 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
 
             {/*---** Property Name Search: Live filtering by text **---*/}
             <div className="space-y-3">
-                <h3 className="text-sm font-black text-brand-dark tracking-tight uppercase">{t("searchByPropertyName")}</h3>
+                <label
+                    htmlFor="property-name-filter"
+                    className="text-sm font-black text-brand-dark tracking-tight uppercase block"
+                >
+                    {t("searchByPropertyName")}
+                </label>
                 <div className="relative">
                     <Search className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-muted" />
                     <Input
+                        id="property-name-filter"
                         placeholder="e.g. Marriott"
                         className="h-12 ps-12 rounded-xl border-border bg-surface font-bold text-brand-muted placeholder:text-brand-muted/50 placeholder:font-normal focus-visible:ring-primary shadow-sm"
                         value={nameSearch}
@@ -157,6 +163,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                                 onValueChange={(val) => setFilters({ min_price: val[0], max_price: val[1] })}
                                 onValueCommit={handlePriceChange}
                                 className="[&_[role=slider]]:h-5 [&_[role=slider]]:w-5 [&_[role=slider]]:border-primary [&_[role=slider]]:bg-white"
+                                aria-label={t("nightlyPrice")}
                             />
                         </div>
                     </AccordionContent>
@@ -246,11 +253,14 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
 }
 
 //---** Helper component for rendering map placeholder graphic **---//
+import Image from "next/image";
+
 function ImagePreview() {
     return (
-        <img
+        <Image
             src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop"
-            alt="Map preview"
+            alt="Map preview showing locations in the current region"
+            fill
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80"
         />
     )

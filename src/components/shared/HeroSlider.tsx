@@ -2,6 +2,7 @@
 
 "use client";
 
+import { Suspense } from "react";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination, A11y } from "swiper/modules";
@@ -79,7 +80,9 @@ export function HeroSlider() {
 
                 {/* Search Form Integration */}
                 <div className="w-full max-w-5xl mt-8 animate-in fade-in zoom-in duration-700 delay-300">
-                    <SearchForm variant="hero" className="shadow-2xl" />
+                    <Suspense fallback={null}>
+                        <SearchForm variant="hero" className="shadow-2xl" />
+                    </Suspense>
                 </div>
             </div>
 

@@ -4,7 +4,9 @@
 
 import { memo, useState, useMemo } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import {
     Star, ChevronLeft, ChevronRight, Heart,
     Waves, Wifi, Coffee, Car, Moon, Users, BedDouble,
@@ -27,6 +29,7 @@ interface HotelCardProps {
 
 export const HotelCard = memo(function HotelCard({ hotel, priority }: HotelCardProps) {
     const t = useTranslations("hotels");
+    const locale = useLocale();
     const [activeImage, setActiveImage] = useState(0);
     const { toggleWishlist, isInWishlist } = useWishlistStore();
     const isWishlisted = isInWishlist(hotel.property_token);
@@ -111,7 +114,7 @@ export const HotelCard = memo(function HotelCard({ hotel, priority }: HotelCardP
                 overflow-hidden mb-5
             ">
                 {/*---** IMAGE PANEL: Displays hotel photos and wishlist toggle **---*/}
-                <div className="relative w-full sm:w-[240px] md:w-[280px] shrink-0 bg-surface-muted min-h-[200px] sm:min-h-0 overflow-hidden">
+                <div className="relative w-full sm:w-[240px] md:w-[280px] shrink-0 bg-surface-muted aspect-[4/3] sm:aspect-auto sm:min-h-full overflow-hidden">
                     <Image
                         src={sanitizeImageUrl(images[activeImage].original || images[activeImage].thumbnail)}
                         alt={`${hotel.name} - ${hotel.city ?? ""}`}
@@ -139,9 +142,9 @@ export const HotelCard = memo(function HotelCard({ hotel, priority }: HotelCardP
                         <div className="min-w-0 flex-1">
                             {/*---** Hotel name **---*/}
                             <h3 className="text-[17px] font-extrabold text-brand-dark leading-snug tracking-tight hover:underline cursor-pointer">
-                                <a href="#" onClick={(e) => e.preventDefault()} className="hover:text-primary transition-colors">
+                                <Link href={`/${locale}/hotels/${hotel.property_token}`} className="hover:text-primary transition-colors">
                                     {hotel.name}
-                                </a>
+                                </Link>
                             </h3>
                             {/*---** City + stars row **---*/}
                             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
@@ -252,13 +255,13 @@ export const HotelCard = memo(function HotelCard({ hotel, priority }: HotelCardP
                                 <span className="text-[26px] font-black text-brand-dark leading-none">
                                     {nightlyDisplay}
                                 </span>
-                                <span className="text-[11px] font-medium text-brand-muted/50 mb-0.5">
+                                <span className="text-[11px] font-medium text-brand-muted mb-0.5">
                                     {t("perNight")}
                                 </span>
                             </div>
 
                             {/*---** Stay summary summary **---*/}
-                            <span className="text-[10px] text-brand-muted/70 font-medium mt-0.5">
+                            <span className="text-[10px] text-brand-muted font-bold mt-0.5">
                                 {roomsCount > 1 ? t("roomCountDisplay", { count: roomsCount }) + " · " : ""}{t("nightsCount", { count: nights })}
                             </span>
                             <div className="w-full h-px bg-border my-1.5" />
@@ -268,7 +271,7 @@ export const HotelCard = memo(function HotelCard({ hotel, priority }: HotelCardP
                                 <span className="text-[13px] font-black text-brand-dark">
                                     {totalDisplay} {t("totalPrice")}
                                 </span>
-                                <span className="text-[10px] text-brand-muted/70 font-medium">
+                                <span className="text-[10px] text-brand-muted font-bold">
                                     {t("includesTaxes")}
                                 </span>
                             </div>

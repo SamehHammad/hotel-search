@@ -13,10 +13,14 @@ export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
 export const PAGE_SIZE = 5;
 
 export const GOOGLE_MAPS_API_KEY =
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ??
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_KEY ??
+    "";
 
 export const GOOGLE_MAPS_MAP_ID =
-    process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_KEY ?? "4b97143a4192b005";
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_ID ??
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_MAP_KEY ??
+    "";
 
 export const LOCALES = ["en", "ar"] as const;
 

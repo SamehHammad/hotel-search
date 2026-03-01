@@ -73,6 +73,7 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     const [rooms, setRooms] = useState<RoomConfig[]>(initialRooms());
     const [suggestions, setSuggestions] = useState<CitySuggestion[]>([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
+    const [activeIndex, setActiveIndex] = useState(-1);
     const suggestionsRef = useRef<HTMLDivElement>(null);
 
     //---** Initialize fuzzy search engine with city suggestions data **---//
@@ -91,6 +92,7 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
         const handleClickOutside = (event: MouseEvent) => {
             if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
                 setShowSuggestions(false);
+                setActiveIndex(-1);
             }
         };
         document.addEventListener("mousedown", handleClickOutside);
@@ -119,6 +121,7 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     const handleLocationChange = (val: string) => {
         setLocation(val);
         setResolvedEnglishName(val);
+        setActiveIndex(-1);
 
         if (val.length < 2) {
             setSuggestions([]);
@@ -129,6 +132,31 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
         const found = searchCities(val);
         setSuggestions(found);
         setShowSuggestions(found.length > 0);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!showSuggestions) return;
+
+        switch (e.key) {
+            case "ArrowDown":
+                e.preventDefault();
+                setActiveIndex((prev) => (prev + 1) % suggestions.length);
+                break;
+            case "ArrowUp":
+                e.preventDefault();
+                setActiveIndex((prev) => (prev - 1 + suggestions.length) % suggestions.length);
+                break;
+            case "Enter":
+                if (activeIndex >= 0) {
+                    e.preventDefault();
+                    handleSelectSuggestion(suggestions[activeIndex]);
+                }
+                break;
+            case "Escape":
+                setShowSuggestions(false);
+                setActiveIndex(-1);
+                break;
+        }
     };
 
     //---** Finalize location selection and update navigation parameters **---//
@@ -215,7 +243,7 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                         "flex flex-col gap-1 px-4 py-2 bg-surface border border-border rounded-2xl lg:flex-[1.5] relative min-w-0 md:min-w-[200px]",
                         isHeader ? "h-[72px] justify-center" : "h-20 justify-center"
                     )}>
-                        <label className="text-[11px] font-bold text-brand-dark flex items-center gap-2">
+                        <label htmlFor="location-search" className="text-[11px] font-bold text-brand-dark flex items-center gap-2 cursor-pointer">
                             <MapPin className="w-3.5 h-3.5 text-brand-dark" />
                             {t("locationLabel")}
                         </label>
@@ -224,6 +252,7 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                                 id="location-search"
                                 value={location}
                                 onChange={(e) => handleLocationChange(e.target.value)}
+                                onKeyDown={handleKeyDown}
                                 onFocus={() => location.length >= 2 && setShowSuggestions(suggestions.length > 0)}
                                 placeholder={t("locationPlaceholder")}
                                 className="h-8 px-2 text-start border-none shadow-none focus-visible:ring-0 font-bold text-brand-muted text-[15px] placeholder:text-brand-muted/50 placeholder:font-normal"
@@ -235,20 +264,23 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                                 aria-expanded={showSuggestions}
                                 aria-haspopup="listbox"
                                 aria-controls="location-suggestions"
-                                aria-owns="location-suggestions"
+                                aria-activedescendant={activeIndex >= 0 ? `suggestion-${suggestions[activeIndex].id}` : undefined}
                             />
                             {/*---** Fuzzy search suggestions dropdown results **---*/}
                             {showSuggestions && (
                                 <div className="absolute top-[calc(100%+12px)] start-[-16px] end-[-16px] bg-surface rounded-2xl shadow-2xl border border-border py-3 z-[110] overflow-hidden">
                                     <ul id="location-suggestions" role="listbox" className="max-h-[300px] overflow-y-auto px-2 list-none m-0 p-0">
-                                        {suggestions.map((city) => (
+                                        {suggestions.map((city, index) => (
                                             <li
                                                 key={city.id}
                                                 id={`suggestion-${city.id}`}
                                                 role="option"
-                                                aria-selected={false}
+                                                aria-selected={index === activeIndex}
                                                 onClick={() => handleSelectSuggestion(city, `${city.name}, ${city.country}`)}
-                                                className="w-full px-4 py-3 flex items-center gap-4 hover:bg-surface-muted rounded-xl transition-all text-left cursor-pointer group"
+                                                className={cn(
+                                                    "w-full px-4 py-3 flex items-center gap-4 rounded-xl transition-all text-left cursor-pointer group",
+                                                    index === activeIndex ? "bg-primary/10" : "hover:bg-surface-muted"
+                                                )}
                                             >
                                                 <div className="bg-surface-muted p-2.5 rounded-xl text-brand-muted group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                                     <MapPin className="h-5 w-5" />

@@ -108,9 +108,9 @@ export function HotelFilterChips() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
                 <div className="space-y-0.5">
                     <h2 className="text-xl font-bold text-brand-dark tracking-tight flex items-center gap-3">
-                        <span className="text-white font-bold text-xl bg-primary px-2 py-1 rounded-full">{hotels.length}+</span> {t("properties")}
+                        <span className="text-white font-bold text-xl bg-brand-dark px-2 py-1 rounded-full">{hotels.length}+</span> {t("properties")}
                     </h2>
-                    <div className="flex items-center gap-1.5 text-xs text-brand-muted/70 font-medium lowercase">
+                    <div className="flex items-center gap-1.5 text-xs text-brand-muted font-bold lowercase">
                         <span>{t("sortOrder")}</span>
 
                         {/*---** Informational tooltip for sorting logic **---*/}
@@ -129,12 +129,12 @@ export function HotelFilterChips() {
 
                 {/*---** Sort order selection control **---*/}
                 <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-[10px] text-brand-muted/50 font-black uppercase tracking-widest hidden md:block">{t("sortBy")}:</span>
+                    <span className="text-[10px] text-brand-muted font-black uppercase tracking-widest hidden md:block">{t("sortBy")}:</span>
                     <Select value={filters.sort_by || "recommended"} onValueChange={(val) => {
                         setFilters({ sort_by: val });
                         setTimeout(() => fetchHotels(), 0);
                     }}>
-                        <SelectTrigger className="w-full sm:w-[220px] h-11 border-border focus:ring-primary/20 focus:border-primary rounded-xl bg-surface text-sm font-bold shadow-sm transition-all text-brand-muted">
+                        <SelectTrigger aria-label={t("sortBy")} className="w-full sm:w-[220px] h-11 border-border focus:ring-primary/20 focus:border-primary rounded-xl bg-surface text-sm font-bold shadow-sm transition-all text-brand-muted">
                             <SelectValue placeholder={t("sortBy")} />
                         </SelectTrigger>
 

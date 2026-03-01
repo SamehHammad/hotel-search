@@ -9,7 +9,7 @@ export function HotelCardSkeleton() {
             <span className="sr-only">Loading hotel card details...</span>
             <div className="flex flex-col sm:flex-row h-full">
                 {/*---** Image section skeleton with pulse animation **---*/}
-                <Skeleton className="relative w-full sm:w-72 h-48 sm:h-auto shrink-0 bg-slate-100 skeleton-pulse rounded-r-none" />
+                <Skeleton className="relative w-full sm:w-72 aspect-[4/3] sm:aspect-auto sm:min-h-full shrink-0 bg-slate-100 skeleton-pulse rounded-r-none" />
 
                 {/*---** Content area skeleton for titles, ratings and pricing **---*/}
                 <CardContent className="flex-1 p-5 flex flex-col justify-between">

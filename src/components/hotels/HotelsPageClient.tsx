@@ -2,28 +2,55 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Navbar } from "@/components/shared/Navbar";
 import { SearchForm } from "@/components/search/SearchForm";
 import { HotelList } from "@/components/hotels/HotelList";
 import { HotelFilters } from "@/components/hotels/HotelFilters";
-import { HotelMap } from "@/components/maps/HotelMap";
+import dynamic from "next/dynamic";
+const HotelMap = dynamic(() => import("@/components/maps/HotelMap").then(m => m.HotelMap), {
+    ssr: false,
+    loading: () => <div className="w-full h-full bg-surface-muted animate-pulse" />
+});
 import { buildHotelListJsonLd } from "@/lib/seo";
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Map as MapIcon, X } from "lucide-react";
 import { useHotels } from "@/hooks/useHotels";
+import useHotelsStore from "@/store/hotels.store";
+import type { Hotel } from "@/types/hotel.types";
+import type { Pagination } from "@/types/api.types";
+import type { SearchFilters } from "@/types/search.types";
 
-export default function HotelsPageClient() {
+interface HotelsPageClientProps {
+    initialData?: {
+        hotels: Hotel[];
+        pagination: Pagination;
+        filters: SearchFilters;
+    };
+}
+
+export default function HotelsPageClient({ initialData }: HotelsPageClientProps) {
     const t = useTranslations("hotels");
     const [isMapOpen, setIsMapOpen] = useState(false);
     const { pagination, filters } = useHotels();
+
+    useEffect(() => {
+        if (!initialData) return;
+
+        const state = useHotelsStore.getState();
+
+        if (state.hotels.length > 0) return;
+
+        state.hydrateFromServer(initialData);
+    }, [initialData]);
 
     return (
         <div className="flex flex-col h-screen bg-surface-muted overflow-hidden relative">
@@ -40,6 +67,10 @@ export default function HotelsPageClient() {
             {/*---** Main multi-column content area **---*/}
             <main className="flex-1 overflow-hidden">
                 <div className="container mx-auto max-w-[1400px] h-full px-4 md:px-6">
+                    {/*---** SEO: Main heading for the search results page **---*/}
+                    <h1 className="sr-only">
+                        {filters.q ? t("resultsFor", { query: filters.q }) : t("hotelsInRegion")}
+                    </h1>
                     {/*---** SEO: Property list JSON-LD for structured data **---*/}
                     <script
                         type="application/ld+json"
@@ -77,6 +108,9 @@ export default function HotelsPageClient() {
             {/*---** Interactive Map Modal: Displays properties on map view **---*/}
             <Dialog open={isMapOpen} onOpenChange={setIsMapOpen}>
                 <DialogContent showCloseButton={false} className="!max-w-[95vw] !w-[1400px] !h-[85vh] flex flex-col !gap-0 !p-0 overflow-hidden border-none rounded-4xl shadow-2xl bg-surface/50 backdrop-blur-xl">
+                    <DialogDescription className="sr-only">
+                        {t("exploreOnMapDescription")}
+                    </DialogDescription>
                     {/*---** Modal Header bar with close control **---*/}
                     <DialogHeader className="absolute top-4 left-4 right-4 z-50 pointer-events-none">
                         <div className="flex justify-between items-center bg-surface/95 backdrop-blur-md px-6 py-3 rounded-2xl shadow-xl border border-border/50 pointer-events-auto w-full max-w-sm mx-auto">
@@ -86,6 +120,7 @@ export default function HotelsPageClient() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => setIsMapOpen(false)}
+                                aria-label={t("closeMap")}
                                 className="rounded-full hover:bg-surface-muted"
                             >
                                 <X className="w-5 h-5" />
