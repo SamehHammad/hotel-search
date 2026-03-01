@@ -48,13 +48,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // --- Determine potential city from query ---
     const normalizedQ = q.toLowerCase().trim();
 
-    /**
-     * City matching priority:
-     * 1. Exact English name match (e.g. "Dubai")
-     * 2. English name contains / is contained by query
-     * 3. Arabic alias exact match (e.g. "دبي")
-     * 4. Arabic alias partial match
-     */
+    /**--City matching priority--*/
     const matchedCity = CITY_SUGGESTIONS.find((c) => {
         const cityLower = c.name.toLowerCase();
         // Exact English name
@@ -172,22 +166,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             return true;
         });
     }
-
-    // --- (Transformation block removed: hotels are now always fetched for the correct city) ---
-
-    // --- Bounds Filtering (Bypass if specific property is searched) ---
-    /* 
-    if (boundsStr && !propertyName) {
-        const parts = boundsStr.split(",").map(Number);
-        if (parts.length === 4) {
-            const [north, south, east, west] = parts;
-            hotels = hotels.filter((h) => {
-                const { latitude, longitude } = h.gps_coordinates;
-                return latitude <= north && latitude >= south && longitude <= east && longitude >= west;
-            });
-        }
-    }
-    */
 
     // --- Pricing Realism ---
     const checkIn = new Date(check_in_date);

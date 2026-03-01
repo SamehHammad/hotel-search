@@ -45,6 +45,23 @@ export function Navbar() {
     const isRtl = locale === "ar";
 
     useEffect(() => {
+        if (!mobileMenuOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") setMobileMenuOpen(false);
+        };
+
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [mobileMenuOpen]);
+
+    useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 20);
         };
@@ -205,64 +222,121 @@ export function Navbar() {
             </div>
 
             {/* Mobile Navigation Drawer */}
-            {mobileMenuOpen && (
-                <div className="lg:hidden absolute top-full left-0 right-0 bg-surface border-b border-border shadow-xl p-4 animate-in slide-in-from-top-4 duration-300">
-                    <nav className="flex flex-col gap-2">
-                        {navLinks.map((link) => {
-                            const Icon = link.icon;
-                            return (
-                                <Link
-                                    key={link.href}
-                                    href={`/${locale}${link.href}`}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-4 p-4 rounded-2xl bg-surface-muted hover:bg-primary/5 text-brand-muted font-bold transition-all"
-                                >
-                                    <div className="w-10 h-10 rounded-xl bg-surface border border-border flex items-center justify-center shadow-sm">
-                                        <Icon className="w-5 h-5 text-primary" />
-                                    </div>
-                                    {link.label}
-                                </Link>
-                            );
-                        })}
-                        <div className="flex flex-col gap-4 mt-4 py-6 border-t border-border">
-                            {/* Mobile User Info */}
-                            <div className="flex items-center gap-4 px-2 mb-2">
-                                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                                    <UserCircle className="w-7 h-7" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-bold text-brand-dark">Sameh Hammad</p>
-                                    <p className="text-xs text-brand-muted font-medium">sameh@example.com</p>
-                                </div>
-                            </div>
+            <div
+                className={cn(
+                    "lg:hidden fixed inset-0 z-[60]",
+                    mobileMenuOpen ? "" : "pointer-events-none"
+                )}
+                role="dialog"
+                aria-modal="true"
+                aria-label="Mobile menu"
+            >
+                <div
+                    className={cn(
+                        "absolute inset-0 bg-black/40 transition-opacity duration-300",
+                        mobileMenuOpen ? "opacity-100" : "opacity-0"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                />
 
-                            <div className="grid grid-cols-1 gap-2">
-                                <Button
-                                    variant="outline"
-                                    className="rounded-2xl border-border font-bold justify-start h-14 px-6 text-brand-muted"
-                                    onClick={() => switchLocale(locale === "en" ? "ar" : "en")}
-                                >
-                                    <Globe className="w-5 h-5 me-3 text-primary" />
-                                    {locale === "en" ? "العربية" : "English"}
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    className="rounded-2xl border-border font-bold justify-start h-14 px-6 text-brand-muted"
-                                >
-                                    <UserCircle className="w-5 h-5 me-3 text-primary" />
-                                    {t("profile")}
-                                </Button>
-                                <Button
-                                    className="rounded-2xl font-black h-14 px-6 bg-destructive/5 text-destructive hover:bg-destructive/10 border-none shadow-none justify-start"
-                                >
-                                    <X className="w-5 h-5 me-3" />
-                                    {t("logout")}
-                                </Button>
+                <div
+                    className={cn(
+                        "absolute top-0 bottom-0 w-[86%] max-w-sm bg-surface border border-border shadow-2xl",
+                        "transition-transform duration-300 ease-out",
+                        isRtl ? "right-0" : "left-0",
+                        mobileMenuOpen
+                            ? "translate-x-0"
+                            : isRtl
+                                ? "translate-x-full"
+                                : "-translate-x-full"
+                    )}
+                >
+                    <div className="h-full flex flex-col">
+                        <div className="flex items-center justify-between gap-3 px-5 h-20 border-b border-border">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                                    <Plane className={cn("w-6 h-6", isRtl ? "-rotate-45" : "rotate-45")} />
+                                </div>
+                                <span className="font-black text-brand-dark">{tCommon("appName")}</span>
+                            </div>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="rounded-full"
+                                onClick={() => setMobileMenuOpen(false)}
+                                aria-label="Close menu"
+                            >
+                                <X className="w-6 h-6" />
+                            </Button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto p-4">
+                            <nav className="flex flex-col gap-2">
+                                {navLinks.map((link) => {
+                                    const Icon = link.icon;
+                                    const isActive = pathname.includes(link.href);
+                                    return (
+                                        <Link
+                                            key={link.href}
+                                            href={`/${locale}${link.href}`}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                            className={cn(
+                                                "flex items-center gap-4 p-4 rounded-2xl font-bold transition-all",
+                                                isActive
+                                                    ? "bg-primary/5 text-primary"
+                                                    : "bg-surface-muted hover:bg-primary/5 text-brand-muted"
+                                            )}
+                                        >
+                                            <div className={cn(
+                                                "w-10 h-10 rounded-xl bg-surface border border-border flex items-center justify-center shadow-sm",
+                                                isActive ? "border-primary/30" : ""
+                                            )}>
+                                                <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-primary")} />
+                                            </div>
+                                            {link.label}
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
+
+                            <div className="mt-4 pt-6 border-t border-border">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <Button
+                                        type="button"
+                                        variant={locale === "en" ? "default" : "outline"}
+                                        className={cn(
+                                            "rounded-2xl font-bold h-12",
+                                            locale === "en" ? "" : "border-border text-brand-muted"
+                                        )}
+                                        onClick={() => {
+                                            switchLocale("en");
+                                            setMobileMenuOpen(false);
+                                        }}
+                                        aria-current={locale === "en" ? "true" : undefined}
+                                    >
+                                        EN
+                                    </Button>
+                                    <Button
+                                        type="button"
+                                        variant={locale === "ar" ? "default" : "outline"}
+                                        className={cn(
+                                            "rounded-2xl font-bold h-12",
+                                            locale === "ar" ? "" : "border-border text-brand-muted"
+                                        )}
+                                        onClick={() => {
+                                            switchLocale("ar");
+                                            setMobileMenuOpen(false);
+                                        }}
+                                        aria-current={locale === "ar" ? "true" : undefined}
+                                    >
+                                        AR
+                                    </Button>
+                                </div>
                             </div>
                         </div>
-                    </nav>
+                    </div>
                 </div>
-            )}
+            </div>
         </header>
     );
 }
