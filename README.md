@@ -6,7 +6,6 @@ A high-performance, production-ready hotel search interface built with **Next.js
 
 ### 🚀 Key Highlights
 
-| Feature | Tech Stack | Status |
 | :--- | :--- | :--- |
 | **Framework** | Next.js 16 (App Router) | ✅ Implemented |
 | **State** | Zustand (with hydration) | ✅ Implemented |
@@ -16,9 +15,7 @@ A high-performance, production-ready hotel search interface built with **Next.js
 
 ---
 
-### 🌟 Implemented “Bonus Points” (Next.js Data Fetching)
-
-#### 🏎️ SSR: Hotels Search (`/hotels`)
+####  SSR: Hotels Search (`/hotels`)
 - **Server-Side Fetching**: Parses `searchParams` and fetches data on the server.
 - **Instant Paint**: Real results are included in the initial HTML, no client fetch delay.
 - **Hydration**: Reuses server data to hydrate Zustand store without double-fetching.
@@ -29,7 +26,7 @@ A high-performance, production-ready hotel search interface built with **Next.js
 
 ---
 
-### 📈 Performance & Accessibility
+###  Performance & Accessibility
 
 - **LCP & CLS Optimization**: Precise `next/image` sizing and aspect-ratio preservation.
 - **Forced Reflow Fixes**: Sticky headers use GPU-accelerated transforms instead of padding shifts.
@@ -40,7 +37,7 @@ A high-performance, production-ready hotel search interface built with **Next.js
 
 ---
 
-### 🖼️ Platform Preview
+###  Platform Preview
 
 <div align="center">
   <table>
@@ -57,7 +54,7 @@ A high-performance, production-ready hotel search interface built with **Next.js
 
 ---
 
-### 🏗️ Architecture & Commands
+###  Architecture & Commands
 
 <details>
 <summary><b>View Folder Structure</b></summary>
@@ -80,5 +77,3 @@ npm run test    # Execute Jest/RTL tests
 ```
 
 ---
-
-*Built with ❤️ following Clean Architecture principles.*
