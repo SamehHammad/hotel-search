@@ -6,6 +6,7 @@ A high-performance, production-ready hotel search interface built with **Next.js
 
 ### 🚀 Key Highlights
 
+| Feature | Tech Stack | Status |
 | :--- | :--- | :--- |
 | **Framework** | Next.js 16 (App Router) | ✅ Implemented |
 | **State** | Zustand (with hydration) | ✅ Implemented |
