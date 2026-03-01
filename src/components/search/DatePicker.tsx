@@ -44,7 +44,7 @@ export function DatePicker({ date, onSelect, label, minDate, variant = "default"
         <div className={cn("flex flex-col gap-1.5 w-full", !isMinimal && "flex-1 sm:min-w-[160px]")}>
             {/*---** Optional field label for standard layout forms **---*/}
             {!isMinimal && (
-                <label className="text-[10px] font-bold text-brand-muted uppercase tracking-[0.1em] ps-1">
+                <label className="text-[10px] font-bold text-brand-dark uppercase tracking-[0.1em] ps-1">
                     {label}
                 </label>
             )}
@@ -56,9 +56,9 @@ export function DatePicker({ date, onSelect, label, minDate, variant = "default"
                         variant={isMinimal ? "ghost" : "outline"}
                         className={cn(
                             isMinimal
-                                ? "h-auto p-0 hover:bg-transparent font-bold text-brand-muted text-[15px] justify-start"
+                                ? "h-auto p-0 hover:bg-transparent font-bold text-brand-dark text-[15px] justify-start"
                                 : "w-full justify-start text-start font-bold h-12 bg-surface rounded-xl shadow-sm border-border hover:border-primary hover:bg-primary/5 transition-all text-sm",
-                            !isValidDate(date) && "text-brand-muted/60 font-medium"
+                            !isValidDate(date) && "text-brand-muted font-medium"
                         )}
                         aria-label={`${label}: ${isValidDate(date) ? format(date, "MMM dd") : t("selectDate")}`}
                     >

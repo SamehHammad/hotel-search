@@ -170,7 +170,7 @@ export const HotelCard = memo(function HotelCard({ hotel, priority }: HotelCardP
                         {/*---** Rating badge with reviews count **---*/}
                         {hotel.rating && (
                             <div className="flex flex-col items-center shrink-0">
-                                <div className="w-10 h-8 bg-[#1e8d35] text-white flex items-center justify-center font-black text-sm rounded-lg">
+                                <div className="w-10 h-8 bg-[#155e27] text-white flex items-center justify-center font-black text-sm rounded-lg">
                                     {formatRating(hotel.rating)}
                                 </div>
                                 <span className="text-[10px] font-bold text-brand-muted mt-0.5 whitespace-nowrap">
@@ -240,7 +240,7 @@ export const HotelCard = memo(function HotelCard({ hotel, priority }: HotelCardP
                                     {t("peopleCount", { count: totalTravellers })}
                                 </div>
                                 <div className="flex items-center gap-1 text-[11px] font-semibold text-brand-dark bg-surface-muted border border-border px-2 py-0.5 rounded-full">
-                                    <BedDouble className="w-3 h-3 text-brand-muted/70" />
+                                    <BedDouble className="w-3 h-3 text-brand-muted" />
                                     {t("roomsCount", { count: roomsCount })}
                                 </div>
                             </div>

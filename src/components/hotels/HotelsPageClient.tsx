@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Navbar } from "@/components/shared/Navbar";
 import { SearchForm } from "@/components/search/SearchForm";
@@ -40,17 +40,17 @@ interface HotelsPageClientProps {
 export default function HotelsPageClient({ initialData }: HotelsPageClientProps) {
     const t = useTranslations("hotels");
     const [isMapOpen, setIsMapOpen] = useState(false);
-    const { pagination, filters } = useHotels();
-
-    useEffect(() => {
-        if (!initialData) return;
-
+    const initialized = useRef(false);
+    if (!initialized.current && initialData) {
         const state = useHotelsStore.getState();
+        // Only hydrate if the store is empty (fresh server landing)
+        if (state.hotels.length === 0) {
+            state.hydrateFromServer(initialData);
+        }
+        initialized.current = true;
+    }
 
-        if (state.hotels.length > 0) return;
-
-        state.hydrateFromServer(initialData);
-    }, [initialData]);
+    const { pagination, filters } = useHotels();
 
     return (
         <div className="flex flex-col h-screen bg-surface-muted overflow-hidden relative">

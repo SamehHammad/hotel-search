@@ -13,7 +13,8 @@
   --color-primary-foreground: hsl(210 40% 98%);
   --color-brand-dark: #051c34;
   --color-brand-dark-hover: #0a2f58;
-  --color-brand-muted: #64748b;
+  --color-brand-muted: #526071;
+  /* Darkened from #64748b to pass 4.5:1 contest */
   --color-brand-light: #f1f5f9;
   --color-surface: #ffffff;
   --color-surface-muted: #f8fafc;

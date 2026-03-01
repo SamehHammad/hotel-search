@@ -76,6 +76,11 @@ export default async function RootLayout({
 
     return (
         <html lang={locale} dir={dir} suppressHydrationWarning>
+            <head>
+                <link rel="preconnect" href="https://lh3.googleusercontent.com" />
+                <link rel="preconnect" href="https://lh5.googleusercontent.com" />
+                <link rel="preconnect" href="https://images.unsplash.com" />
+            </head>
             <body className={`${cairo.className} antialiased flex flex-col min-h-screen`}>
                 {/*---** Provide translations to client components **---*/}
                 <NextIntlClientProvider locale={locale} messages={messages}>

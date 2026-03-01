@@ -125,7 +125,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                     <Input
                         id="property-name-filter"
                         placeholder="e.g. Marriott"
-                        className="h-12 ps-12 rounded-xl border-border bg-surface font-bold text-brand-muted placeholder:text-brand-muted/50 placeholder:font-normal focus-visible:ring-primary shadow-sm"
+                        className="h-12 ps-12 rounded-xl border-border bg-surface font-bold text-brand-dark placeholder:text-brand-muted placeholder:font-normal focus-visible:ring-primary shadow-sm"
                         value={nameSearch}
                         onChange={(e) => {
                             setNameSearch(e.target.value);

@@ -92,7 +92,7 @@ export function GuestsSelector({
                             <div className="flex flex-col items-start leading-[1.3] overflow-hidden text-left rtl:text-right">
                                 <span className={cn(
                                     "font-extrabold tracking-tight whitespace-nowrap",
-                                    isMinimal ? "text-[12px] text-brand-dark" : "text-[11px] text-brand-muted uppercase"
+                                    isMinimal ? "text-[12px] text-brand-dark" : "text-[11px] text-brand-dark uppercase"
                                 )}>
                                     {isMinimal ? ts("travellers") : ts("guestsLabel")}
                                 </span>
@@ -105,7 +105,7 @@ export function GuestsSelector({
                             </div>
                         </div>
 
-                        {!isMinimal && <ChevronDown className="w-4 h-4 text-brand-muted/50" />}
+                        {!isMinimal && <ChevronDown className="w-4 h-4 text-brand-muted" />}
                     </Button>
                 </PopoverTrigger>
 

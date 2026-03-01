@@ -67,11 +67,14 @@ export function Navbar() {
     return (
         <header
             className={cn(
-                "sticky top-0 z-50 w-full transition-all duration-300 border-b",
-                isScrolled ? "bg-surface/95 backdrop-blur-md shadow-sm border-border py-2" : "bg-surface border-transparent py-4"
+                "sticky top-0 z-50 w-full transition-all duration-300 border-b h-20 flex items-center",
+                isScrolled ? "bg-surface/95 backdrop-blur-md shadow-sm border-border" : "bg-surface border-transparent"
             )}
         >
-            <div className="container mx-auto max-w-[1440px] flex items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div className={cn(
+                "container mx-auto max-w-[1440px] flex items-center justify-between px-4 sm:px-6 lg:px-8 transition-all duration-300",
+                isScrolled ? "scale-[0.98]" : "scale-100"
+            )}>
 
                 {/* Logo Section */}
                 <div className="flex items-center gap-8">

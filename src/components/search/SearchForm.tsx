@@ -255,7 +255,7 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                                 onKeyDown={handleKeyDown}
                                 onFocus={() => location.length >= 2 && setShowSuggestions(suggestions.length > 0)}
                                 placeholder={t("locationPlaceholder")}
-                                className="h-8 px-2 text-start border-none shadow-none focus-visible:ring-0 font-bold text-brand-muted text-[15px] placeholder:text-brand-muted/50 placeholder:font-normal"
+                                className="h-8 px-2 text-start border-none shadow-none focus-visible:ring-0 font-bold text-brand-dark text-[15px] placeholder:text-brand-muted placeholder:font-normal"
                                 required
                                 autoComplete="off"
                                 role="combobox"
@@ -304,11 +304,11 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                     )}>
                         {/*---** Check-in Date **---*/}
                         <div className="flex-1 flex flex-col justify-center px-4 h-full hover:bg-surface-muted transition-colors rounded-s-2xl cursor-pointer">
-                            <label className="text-[10px] font-black text-brand-muted uppercase tracking-widest mb-0.5 text-start">
+                            <label className="text-[10px] font-black text-brand-dark uppercase tracking-widest mb-0.5 text-start">
                                 {t("checkInLabel")}
                             </label>
                             <div className="flex items-center gap-2">
-                                <Calendar className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                                <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
                                 <DatePicker
                                     date={checkIn}
                                     onSelect={setCheckIn}
@@ -320,11 +320,11 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
 
                         {/*---** Check-out Date **---*/}
                         <div className="flex-1 flex flex-col justify-center px-4 h-full hover:bg-surface-muted transition-colors rounded-e-2xl cursor-pointer">
-                            <label className="text-[10px] font-black text-brand-muted uppercase tracking-widest mb-0.5 text-start">
+                            <label className="text-[10px] font-black text-brand-dark uppercase tracking-widest mb-0.5 text-start">
                                 {t("checkOutLabel")}
                             </label>
                             <div className="flex items-center gap-2">
-                                <Calendar className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                                <Calendar className="w-3.5 h-3.5 text-primary shrink-0" />
                                 <DatePicker
                                     date={checkOut}
                                     onSelect={setCheckOut}
