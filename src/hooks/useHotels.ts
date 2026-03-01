@@ -1,6 +1,6 @@
 //---** useHotels: orchestrates hotel fetching with store integration and URL synchronization **---//
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import useHotelsStore from "@/store/hotels.store";
 import useWishlistStore from "@/store/wishlist.store";
@@ -76,6 +76,8 @@ export function useHotels() {
         }
     }, [filters, pathname, router]);
 
+    const lastFetchedParams = useRef<string | null>(null);
+
     //---** Load filters from URL parameters into internal store state on mount or URL change **---//
     useEffect(() => {
         const isWishlistMode = searchParams.get("wishlist") === "true";
@@ -130,7 +132,13 @@ export function useHotels() {
             JSON.stringify(wishlistTokens?.sort() || []) !== JSON.stringify((storeFilters.wishlist_tokens || []).sort()) ||
             isWishlistMode !== (storeFilters.is_wishlist || false);
 
-        if (!hasChanged) return;
+        //---** Decide whether to trigger a fresh fetch cycle **---//
+        const currentParamsStr = searchParams.toString();
+        const shouldFetch = (hasChanged || (hotels.length === 0 && !loading)) &&
+            (q || isWishlistMode) &&
+            (lastFetchedParams.current !== currentParamsStr);
+
+        if (!shouldFetch) return;
 
         if (bounds && !mapBounds) {
             useHotelsStore.getState().setBounds(bounds);
@@ -152,8 +160,13 @@ export function useHotels() {
             is_wishlist: isWishlistMode,
         });
 
-        fetchHotels();
-    }, [searchParams, fetchHotels, setFilters, resetHotels, mapBounds]);
+        //---** We only trigger the actual API fetch if we aren't already loading **---//
+        //---** This prevents duplicate calls on mount when filters and URL sync up **---//
+        if (!loading) {
+            lastFetchedParams.current = currentParamsStr;
+            fetchHotels();
+        }
+    }, [searchParams, fetchHotels, setFilters, resetHotels, hotels.length, loading, mapBounds]);
 
     return {
         hotels,

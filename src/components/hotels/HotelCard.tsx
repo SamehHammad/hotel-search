@@ -93,13 +93,13 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
         <>
             <article className="
                 group flex flex-col sm:flex-row
-                bg-white border border-slate-200/80 rounded-2xl
+                bg-surface border border-border rounded-2xl
                 shadow-sm hover:shadow-xl
                 transition-shadow duration-300
                 overflow-hidden mb-5
             ">
                 {/*---** IMAGE PANEL: Displays hotel photos and wishlist toggle **---*/}
-                <div className="relative w-full sm:w-[240px] md:w-[280px] shrink-0 bg-slate-100 min-h-[200px] sm:min-h-0">
+                <div className="relative w-full sm:w-[240px] md:w-[280px] shrink-0 bg-surface-muted min-h-[200px] sm:min-h-0">
                     {/*---** Blurred BG fallback **---*/}
                     <div
                         className="absolute inset-0 bg-cover bg-center opacity-30"
@@ -119,29 +119,37 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                     <button
                         onClick={handleWishlist}
                         aria-label="Toggle wishlist"
-                        className="absolute top-3 right-3 z-20 bg-white/90 hover:bg-white text-slate-700 p-1.5 rounded-full shadow-md transition-all hover:scale-110 active:scale-95"
+                        className="absolute top-3 right-3 z-20 bg-surface/90 hover:bg-surface text-brand-dark p-1.5 rounded-full shadow-md transition-all hover:scale-110 active:scale-95"
                     >
-                        <Heart className={cn("w-4 h-4 transition-colors", isWishlisted ? "fill-red-500 text-red-500" : "fill-none text-slate-400")} />
+                        <Heart className={cn("w-4 h-4 transition-colors", isWishlisted ? "fill-red-500 text-red-500" : "fill-none text-brand-muted")} />
                     </button>
                 </div>
                 {/*---** CONTENT PANEL: Displays names, amenities, and pricing **---*/}
                 <div className="flex flex-col flex-1 min-w-0">
 
                     {/*---** Top section: name + rating badge **---*/}
-                    <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-100">
+                    <div className="flex items-start justify-between gap-3 px-4 pt-4 pb-3 border-b border-border">
                         <div className="min-w-0 flex-1">
                             {/*---** Hotel name **---*/}
-                            <h3 className="text-[17px] font-extrabold text-[#051c34] leading-snug tracking-tight hover:underline cursor-pointer">
+                            <h3 className="text-[17px] font-extrabold text-brand-dark leading-snug tracking-tight hover:underline cursor-pointer">
                                 {hotel.name}
                             </h3>
                             {/*---** City + stars row **---*/}
                             <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                <span className="text-[13px] font-medium text-slate-500">{hotel.city ?? "—"}</span>
-                                {stars > 0 && (
+                                <span className="text-[13px] font-medium text-brand-muted">{hotel.city ?? "—"}</span>
+                                {hotel.rating && (
                                     <div className="flex items-center gap-0.5">
-                                        {Array.from({ length: stars }).map((_, i) => (
-                                            <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                        {Array.from({ length: Math.floor(hotel.rating) }).map((_, i) => (
+                                            <Star key={`full-${i}`} className="w-3 h-3 fill-amber-400 text-amber-400" />
                                         ))}
+                                        {hotel.rating % 1 >= 0.5 && (
+                                            <div className="relative w-3 h-3">
+                                                <Star className="absolute inset-0 w-3 h-3 text-amber-400" />
+                                                <div className="absolute inset-0 overflow-hidden w-1/2">
+                                                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -152,7 +160,7 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                                 <div className="w-10 h-8 bg-[#1e8d35] text-white flex items-center justify-center font-black text-sm rounded-lg">
                                     {formatRating(hotel.rating)}
                                 </div>
-                                <span className="text-[10px] font-bold text-slate-500 mt-0.5 whitespace-nowrap">
+                                <span className="text-[10px] font-bold text-brand-muted mt-0.5 whitespace-nowrap">
                                     {formatReviews(hotel.reviews ?? 0)} {t("reviews")}
                                 </span>
                             </div>
@@ -160,7 +168,7 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                     </div>
 
                     {/*---** Middle section: amenities + description **---*/}
-                    <div className="px-4 py-3 flex flex-col gap-2 border-b border-slate-100">
+                    <div className="px-4 py-3 flex flex-col gap-2 border-b border-border">
                         {/*---** Amenity pills **---*/}
                         <div className="flex flex-wrap gap-1.5">
                             {hasWifi && (
@@ -186,7 +194,7 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                         </div>
 
                         {/*---** Hotel description preview **---*/}
-                        <p className="text-[12px] text-slate-500 leading-relaxed line-clamp-2">
+                        <p className="text-[12px] text-brand-muted leading-relaxed line-clamp-2">
                             {hotel.description ?? t("mockDesc")}
                         </p>
                     </div>
@@ -199,14 +207,14 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                             {/*---** Stay duration dates **---*/}
                             {checkInLabel && checkOutLabel && (
                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                    <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full">
-                                        <CalendarDays className="w-3 h-3 text-slate-400" />
+                                    <div className="flex items-center gap-1 text-[11px] font-semibold text-brand-muted bg-surface-muted border border-border px-2 py-0.5 rounded-full">
+                                        <CalendarDays className="w-3 h-3 text-brand-muted/70" />
                                         {checkInLabel}
-                                        <ArrowRight className="w-2.5 h-2.5 text-slate-300 mx-0.5" />
+                                        <ArrowRight className="w-2.5 h-2.5 opacity-30 mx-0.5" />
                                         {checkOutLabel}
                                     </div>
-                                    <div className="flex items-center gap-1 text-[11px] font-semibold text-slate-600 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full">
-                                        <Moon className="w-3 h-3 text-slate-400" />
+                                    <div className="flex items-center gap-1 text-[11px] font-semibold text-brand-muted bg-surface-muted border border-border px-2 py-0.5 rounded-full">
+                                        <Moon className="w-3 h-3 text-brand-muted/70" />
                                         {t("nightsCount", { count: nights })}
                                     </div>
                                 </div>
@@ -214,12 +222,12 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
 
                             {/*---** Occupancy details **---*/}
                             <div className="flex items-center gap-1.5 flex-wrap">
-                                <div className="flex items-center gap-1 text-[11px] font-semibold text-[#051c34] bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">
-                                    <Users className="w-3 h-3 text-indigo-400" />
+                                <div className="flex items-center gap-1 text-[11px] font-semibold text-brand-dark bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">
+                                    <Users className="w-3 h-3 text-brand-muted/70" />
                                     {t("peopleCount", { count: totalTravellers })}
                                 </div>
-                                <div className="flex items-center gap-1 text-[11px] font-semibold text-[#051c34] bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full">
-                                    <BedDouble className="w-3 h-3 text-slate-400" />
+                                <div className="flex items-center gap-1 text-[11px] font-semibold text-brand-dark bg-surface-muted border border-border px-2 py-0.5 rounded-full">
+                                    <BedDouble className="w-3 h-3 text-brand-muted/70" />
                                     {t("roomsCount", { count: roomsCount })}
                                 </div>
                             </div>
@@ -228,29 +236,29 @@ export const HotelCard = memo(function HotelCard({ hotel }: HotelCardProps) {
                         </div>
 
                         {/*---** RIGHT: Pricing panel with breakdown **---*/}
-                        <div className="flex flex-col items-end shrink-0 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 min-w-[160px]">
+                        <div className="flex flex-col items-end shrink-0 bg-surface-muted border border-border rounded-xl px-3.5 py-2.5 min-w-[160px]">
                             {/*---** Nightly rate per room **---*/}
                             <div className="flex items-baseline gap-1">
-                                <span className="text-[26px] font-black text-[#051c34] leading-none">
+                                <span className="text-[26px] font-black text-brand-dark leading-none">
                                     {nightlyDisplay}
                                 </span>
-                                <span className="text-[11px] font-medium text-slate-400 mb-0.5">
+                                <span className="text-[11px] font-medium text-brand-muted/50 mb-0.5">
                                     {t("perNight")}
                                 </span>
                             </div>
 
                             {/*---** Stay summary summary **---*/}
-                            <span className="text-[10px] text-slate-400 font-medium mt-0.5">
+                            <span className="text-[10px] text-brand-muted/70 font-medium mt-0.5">
                                 {roomsCount > 1 ? t("roomCountDisplay", { count: roomsCount }) + " · " : ""}{t("nightsCount", { count: nights })}
                             </span>
-                            <div className="w-full h-px bg-slate-200 my-1.5" />
+                            <div className="w-full h-px bg-border my-1.5" />
 
                             {/*---** Final total price **---*/}
                             <div className="flex flex-col items-end">
-                                <span className="text-[13px] font-black text-[#051c34]">
+                                <span className="text-[13px] font-black text-brand-dark">
                                     {totalDisplay} {t("totalPrice")}
                                 </span>
-                                <span className="text-[10px] text-slate-400 font-medium">
+                                <span className="text-[10px] text-brand-muted/70 font-medium">
                                     {t("includesTaxes")}
                                 </span>
                             </div>

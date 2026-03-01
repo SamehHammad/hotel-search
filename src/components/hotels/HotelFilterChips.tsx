@@ -69,12 +69,12 @@ export function HotelFilterChips() {
                 {activeFilters.map((filter) => (
                     <Badge
                         key={filter.id}
-                        className="bg-white border-2 border-indigo-100/50 hover:border-indigo-400 text-slate-700 flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm group transition-all"
+                        className="bg-surface border-2 border-border hover:border-primary/50 text-brand-muted flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold shadow-sm group transition-all"
                     >
                         {filter.label}
                         <button
                             onClick={() => handleRemoveFilter(filter)}
-                            className="bg-slate-50 group-hover:bg-slate-100 p-0.5 rounded-full text-slate-400 hover:text-slate-900 transition-colors"
+                            className="bg-surface-muted group-hover:bg-brand-light p-0.5 rounded-full text-brand-muted/70 hover:text-brand-dark transition-colors"
                         >
                             <X className="w-3.5 h-3.5" />
                         </button>
@@ -86,7 +86,7 @@ export function HotelFilterChips() {
                     <Button
                         variant="ghost"
                         size="sm"
-                        className="text-xs font-bold text-slate-500 hover:text-slate-900 px-2 h-8 hover:bg-slate-50 rounded-full"
+                        className="text-xs font-bold text-brand-muted/70 hover:text-brand-dark px-2 h-8 hover:bg-surface-muted rounded-full"
                         onClick={() => {
                             setFilters({
                                 property_name: "",
@@ -104,12 +104,12 @@ export function HotelFilterChips() {
             </div>
 
             {/*---** Results count and sorting dropdown row **---*/}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-4">
                 <div className="space-y-0.5">
-                    <h2 className="text-xl font-bold text-[#051c34] tracking-tight flex items-center gap-3">
+                    <h2 className="text-xl font-bold text-brand-dark tracking-tight flex items-center gap-3">
                         {pagination.records_to || hotels.length}+ {t("properties")}
                     </h2>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium lowercase">
+                    <div className="flex items-center gap-1.5 text-xs text-brand-muted/70 font-medium lowercase">
                         <span>{t("sortOrder")}</span>
 
                         {/*---** Informational tooltip for sorting logic **---*/}
@@ -118,7 +118,7 @@ export function HotelFilterChips() {
                                 <TooltipTrigger asChild>
                                     <Info className="w-3.5 h-3.5 cursor-help" />
                                 </TooltipTrigger>
-                                <TooltipContent className="max-w-[240px] bg-slate-900 text-white text-xs border-none p-3 shadow-xl rounded-xl">
+                                <TooltipContent className="max-w-[240px] bg-brand-dark text-white text-xs border-none p-3 shadow-xl rounded-xl">
                                     <p>{t("sortDescription")}</p>
                                 </TooltipContent>
                             </Tooltip>
@@ -128,19 +128,19 @@ export function HotelFilterChips() {
 
                 {/*---** Sort order selection control **---*/}
                 <div className="flex items-center gap-3 shrink-0">
-                    <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest hidden md:block">{t("sortBy")}:</span>
-                    <Select defaultValue="recommended" onValueChange={(val) => {
+                    <span className="text-[10px] text-brand-muted/50 font-black uppercase tracking-widest hidden md:block">{t("sortBy")}:</span>
+                    <Select value={filters.sort_by || "recommended"} onValueChange={(val) => {
                         setFilters({ sort_by: val });
-                        fetchHotels();
+                        setTimeout(() => fetchHotels(), 0);
                     }}>
-                        <SelectTrigger className="w-full sm:w-[220px] h-11 border-slate-200 focus:ring-primary/20 focus:border-primary rounded-xl bg-white text-sm font-bold shadow-sm transition-all text-slate-700">
+                        <SelectTrigger className="w-full sm:w-[220px] h-11 border-border focus:ring-primary/20 focus:border-primary rounded-xl bg-surface text-sm font-bold shadow-sm transition-all text-brand-muted">
                             <SelectValue placeholder={t("sortBy")} />
                         </SelectTrigger>
 
-                        <SelectContent className="rounded-xl border-slate-100 shadow-2xl p-1 bg-white">
-                            <SelectItem value="recommended" className="rounded-lg py-2.5 font-medium focus:bg-indigo-50 hover:bg-slate-50 transition-colors">{t("sortRecommended")}</SelectItem>
-                            <SelectItem value="price_asc" className="rounded-lg py-2.5 font-medium focus:bg-indigo-50 hover:bg-slate-50 transition-colors">{t("sortPriceAsc")}</SelectItem>
-                            <SelectItem value="rating" className="rounded-lg py-2.5 font-medium focus:bg-indigo-50 hover:bg-slate-50 transition-colors">{t("sortRating")}</SelectItem>
+                        <SelectContent className="rounded-xl border-border shadow-2xl p-1 bg-surface">
+                            <SelectItem value="recommended" className="rounded-lg py-2.5 font-medium focus:bg-surface-muted hover:bg-surface-muted transition-colors">{t("sortRecommended")}</SelectItem>
+                            <SelectItem value="price_asc" className="rounded-lg py-2.5 font-medium focus:bg-surface-muted hover:bg-surface-muted transition-colors">{t("sortPriceAsc")}</SelectItem>
+                            <SelectItem value="rating" className="rounded-lg py-2.5 font-medium focus:bg-surface-muted hover:bg-surface-muted transition-colors">{t("sortRating")}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>

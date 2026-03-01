@@ -84,11 +84,11 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
             {/*---** Section Header: Title and total results count **---*/}
             <div className="flex items-center justify-between">
                 <div className="space-y-1">
-                    <h3 className="text-2xl font-black text-[#051c34] tracking-tight flex items-center gap-2">
+                    <h3 className="text-2xl font-black text-brand-dark tracking-tight flex items-center gap-2">
                         <Filter className="w-5 h-5 text-primary" />
                         {t("filterBy")}
                     </h3>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                    <p className="text-xs font-bold text-brand-muted uppercase tracking-widest">
                         {loading ? t("searching") : `${pagination.records_to || 0} ${t("hotelsFound")}`}
                     </p>
                 </div>
@@ -96,15 +96,15 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
 
             {/*---** Interactive Map Preview Card **---*/}
             <div
-                className="group relative cursor-pointer overflow-hidden rounded-[24px] border border-slate-200 bg-white p-1 hover:shadow-xl transition-all duration-500"
+                className="group relative cursor-pointer overflow-hidden rounded-3xl border border-border bg-surface p-1 hover:shadow-xl transition-all duration-500"
                 onClick={onViewMap}
             >
-                <div className="relative h-[140px] w-full overflow-hidden rounded-[20px]">
+                <div className="relative h-[140px] w-full overflow-hidden rounded-2xl">
                     <ImagePreview />
                     <div className="absolute inset-0 bg-indigo-900/10 group-hover:bg-transparent transition-colors" />
                     <Button
                         variant="secondary"
-                        className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white text-[#051c34] font-black rounded-full h-11 px-6 shadow-xl shadow-black/10 border-none hover:bg-slate-50 active:scale-95 transition-all text-sm whitespace-nowrap"
+                        className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-surface text-brand-dark font-black rounded-full h-11 px-6 shadow-xl shadow-black/10 border-none hover:bg-brand-light active:scale-95 transition-all text-sm whitespace-nowrap"
                     >
                         <MapIcon className="w-4 h-4 me-2 text-primary" />
                         {t("viewInMap")}
@@ -114,12 +114,12 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
 
             {/*---** Property Name Search: Live filtering by text **---*/}
             <div className="space-y-3">
-                <h3 className="text-sm font-black text-[#051c34] tracking-tight uppercase">{t("searchByPropertyName")}</h3>
+                <h3 className="text-sm font-black text-brand-dark tracking-tight uppercase">{t("searchByPropertyName")}</h3>
                 <div className="relative">
-                    <Search className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Search className="absolute start-4 top-1/2 -translate-y-1/2 h-4 w-4 text-brand-muted" />
                     <Input
                         placeholder="e.g. Marriott"
-                        className="h-12 ps-12 rounded-xl border-slate-200 bg-white font-bold text-slate-700 placeholder:text-slate-400 placeholder:font-normal focus-visible:ring-primary shadow-sm"
+                        className="h-12 ps-12 rounded-xl border-border bg-surface font-bold text-brand-muted placeholder:text-brand-muted/50 placeholder:font-normal focus-visible:ring-primary shadow-sm"
                         value={nameSearch}
                         onChange={(e) => {
                             setNameSearch(e.target.value);
@@ -132,21 +132,21 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
             {/*---** Main Accordion: Collapsible price and amenity filters **---*/}
             <Accordion type="multiple" defaultValue={["price", "rating"]} className="w-full space-y-3">
                 {/*---** Nightly Price Selection Slider **---*/}
-                <AccordionItem value="price" className="border-none bg-white rounded-[24px] px-5 py-0 shadow-sm border border-slate-100 overflow-hidden">
+                <AccordionItem value="price" className="border-none bg-surface rounded-3xl px-5 py-0 shadow-sm border border-border overflow-hidden">
                     <AccordionTrigger className="hover:no-underline py-4">
-                        <span className="font-black text-[#051c34] text-[15px] tracking-tight">{t("nightlyPrice")}</span>
+                        <span className="font-black text-brand-dark text-[15px] tracking-tight">{t("nightlyPrice")}</span>
                     </AccordionTrigger>
                     <AccordionContent className="pb-6">
                         <div className="pt-2 px-1 space-y-6">
-                            <div className="flex justify-between items-center bg-slate-50/80 p-3 rounded-xl border border-slate-100">
-                                <div className="flex flex-col">
-                                    <span className="text-[9px] uppercase font-black text-slate-400 tracking-widest">{t("min")}</span>
-                                    <span className="text-md font-black text-[#051c34]">${filters.min_price || 0}</span>
+                            <div className="flex justify-between items-center bg-surface-muted p-3 rounded-xl border border-border">
+                                <div className="flex flex-col items-start">
+                                    <span className="text-[9px] uppercase font-black text-brand-muted tracking-widest">{t("max")}</span>
+                                    <span className="text-md font-black text-brand-dark">${filters.max_price || 2000}</span>
                                 </div>
-                                <div className="h-4 w-px bg-slate-200" />
+                                <div className="h-4 w-px bg-border" />
                                 <div className="flex flex-col items-end">
-                                    <span className="text-[9px] uppercase font-black text-slate-400 tracking-widest">{t("max")}</span>
-                                    <span className="text-md font-black text-[#051c34]">${filters.max_price || 2000}</span>
+                                    <span className="text-[9px] uppercase font-black text-brand-muted tracking-widest">{t("min")}</span>
+                                    <span className="text-md font-black text-brand-dark">${filters.min_price || 0}</span>
                                 </div>
                             </div>
                             <Slider
@@ -163,9 +163,9 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                 </AccordionItem>
 
                 {/*---** Star Rating Selection Buttons **---*/}
-                <AccordionItem value="rating" className="border-none bg-white rounded-[24px] px-5 py-0 shadow-sm border border-slate-100 overflow-hidden">
+                <AccordionItem value="rating" className="border-none bg-surface rounded-3xl px-5 py-0 shadow-sm border border-border overflow-hidden">
                     <AccordionTrigger className="hover:no-underline py-4">
-                        <span className="font-black text-[#051c34] text-[15px] tracking-tight">{t("starRating")}</span>
+                        <span className="font-black text-brand-dark text-[15px] tracking-tight">{t("starRating")}</span>
                     </AccordionTrigger>
                     <AccordionContent className="pb-6">
                         <div className="grid grid-cols-5 gap-2 pt-1">
@@ -177,13 +177,13 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                                         variant="outline"
                                         onClick={() => toggleStar(star)}
                                         className={cn(
-                                            "h-10 rounded-xl font-black transition-all active:scale-95 border-slate-200",
+                                            "h-10 rounded-xl font-black transition-all active:scale-95 border-border",
                                             isSelected
                                                 ? "bg-amber-50 border-amber-400 text-amber-600 shadow-sm"
-                                                : "text-slate-700 hover:bg-slate-50"
+                                                : "text-brand-muted hover:bg-surface-muted"
                                         )}
                                     >
-                                        {star} <Star className={cn("w-3 h-3 ms-1", isSelected ? "fill-amber-400 text-amber-400" : "text-slate-300")} />
+                                        {star} <Star className={cn("w-3 h-3 ms-1", isSelected ? "fill-amber-400 text-amber-400" : "text-brand-muted/30")} />
                                     </Button>
                                 );
                             })}
@@ -192,9 +192,9 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                 </AccordionItem>
 
                 {/*---** Popular Amenities Checkboxes **---*/}
-                <AccordionItem value="amenities" className="border-none bg-white rounded-[24px] px-5 py-0 shadow-sm border border-slate-100 overflow-hidden">
+                <AccordionItem value="amenities" className="border-none bg-surface rounded-3xl px-5 py-0 shadow-sm border border-border overflow-hidden">
                     <AccordionTrigger className="hover:no-underline py-4">
-                        <span className="font-black text-[#051c34] text-[15px] tracking-tight">{t("popularFilters")}</span>
+                        <span className="font-black text-brand-dark text-[15px] tracking-tight">{t("popularFilters")}</span>
                     </AccordionTrigger>
                     <AccordionContent className="pb-6">
                         <div className="flex flex-col gap-3 pt-1">
@@ -214,11 +214,11 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                                             id={`amenity-${item.key}`}
                                             checked={filters.amenities?.includes(item.key)}
                                             onCheckedChange={() => toggleAmenity(item.key)}
-                                            className="rounded-md border-slate-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                            className="rounded-md border-border data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                                         />
                                         <label
                                             htmlFor={`amenity-${item.key}`}
-                                            className="text-sm font-bold text-slate-700 cursor-pointer group-hover:text-primary transition-colors flex-1"
+                                            className="text-sm font-bold text-brand-muted cursor-pointer group-hover:text-primary transition-colors flex-1"
                                         >
                                             {item.label}
                                         </label>
@@ -235,7 +235,7 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
                 <Button
                     variant="ghost"
                     onClick={handleClearFilters}
-                    className="w-full h-12 rounded-2xl text-slate-500 font-bold text-sm hover:bg-slate-100 hover:text-slate-900 group"
+                    className="w-full h-12 rounded-2xl text-brand-muted font-bold text-sm hover:bg-brand-light hover:text-brand-dark group"
                 >
                     <RotateCcw className="w-4 h-4 me-2 transition-transform group-hover:-rotate-45" />
                     {t("clearAll")}

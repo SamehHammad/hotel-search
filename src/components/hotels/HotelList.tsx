@@ -55,7 +55,7 @@ export function HotelList() {
     if (loading && hotels.length === 0) {
         return (
             <div className="space-y-6">
-                {[...Array(3)].map((_, i) => (
+                {[...Array(5)].map((_, i) => (
                     <HotelCardSkeleton key={i} />
                 ))}
             </div>
@@ -66,13 +66,13 @@ export function HotelList() {
     if (!loading && hotels.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="w-24 h-24 bg-indigo-50 rounded-full flex items-center justify-center mb-6">
+                <div className="w-24 h-24 bg-brand-light rounded-full flex items-center justify-center mb-6">
                     <span className="text-4xl">🏨</span>
                 </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">
+                <h3 className="text-xl font-bold text-brand-dark mb-2">
                     {hasSearchQuery ? tCommon("noResults") : t("readyToExplore")}
                 </h3>
-                <p className="text-slate-500 max-w-sm mb-6">
+                <p className="text-brand-muted max-w-sm mb-6">
                     {hasSearchQuery
                         ? t("resultsCount", { count: 0 })
                         : t("searchPrompt")
@@ -99,13 +99,13 @@ export function HotelList() {
                 {/*---** Infinite Scroll Sentinel: Observes for lazy loading triggers **---*/}
                 <div ref={sentinelRef} className="h-10 w-full flex items-center justify-center mt-6 mb-12">
                     {isFetchingMore && (
-                        <div className="flex items-center gap-3 text-indigo-600 font-medium">
+                        <div className="flex items-center gap-3 text-primary font-medium">
                             <Loader2 className="w-5 h-5 animate-spin" />
                             <span>{t("loadingMore")}</span>
                         </div>
                     )}
                     {!hasMore && hotels.length > 0 && !loading && (
-                        <p className="text-slate-400 font-medium">{t("noMoreHotels")}</p>
+                        <p className="text-brand-muted font-medium">{t("noMoreHotels")}</p>
                     )}
                 </div>
             </div>

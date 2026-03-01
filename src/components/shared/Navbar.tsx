@@ -16,7 +16,8 @@ import {
     Globe,
     UserCircle,
     ChevronDown,
-    Heart
+    Heart,
+    Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,9 +54,8 @@ export function Navbar() {
 
     const navLinks = [
         { href: "/hotels", label: t("hotels"), icon: Building2 },
-        { href: "/flights", label: t("flights"), icon: Plane },
-        { href: "/cars", label: t("cars"), icon: Car },
-        { href: "/tours", label: t("tours"), icon: Compass },
+        { href: "/about", label: t("about"), icon: Compass },
+        { href: "/contact", label: t("contact"), icon: Mail },
     ];
 
     const switchLocale = (newLocale: string) => {
@@ -67,8 +67,8 @@ export function Navbar() {
     return (
         <header
             className={cn(
-                "sticky top-0 z-40 w-full transition-all duration-300 border-b",
-                isScrolled ? "bg-white/95 backdrop-blur-md shadow-sm border-slate-100 py-2" : "bg-white border-transparent py-4"
+                "sticky top-0 z-50 w-full transition-all duration-300 border-b",
+                isScrolled ? "bg-surface/95 backdrop-blur-md shadow-sm border-border py-2" : "bg-surface border-transparent py-4"
             )}
         >
             <div className="container mx-auto max-w-[1440px] flex items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -79,9 +79,9 @@ export function Navbar() {
                         <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20 group-hover:scale-105 transition-all">
                             <Plane className={cn("w-6 h-6 transform transition-transform group-hover:rotate-12", isRtl ? "-rotate-45" : "rotate-45")} />
                         </div>
-                        <span className="font-extrabold text-2xl tracking-tighter text-slate-900 hidden md:inline-block">
+                        {/* <span className="font-extrabold text-2xl tracking-tighter text-brand-dark hidden md:inline-block">
                             {tCommon("appName")}
-                        </span>
+                        </span> */}
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -97,7 +97,7 @@ export function Navbar() {
                                         "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold transition-all",
                                         isActive
                                             ? "bg-primary/5 text-primary"
-                                            : "text-slate-600 hover:bg-slate-50 hover:text-primary"
+                                            : "text-brand-muted hover:bg-surface-muted hover:text-primary"
                                     )}
                                 >
                                     <Icon className="w-4 h-4" />
@@ -114,13 +114,13 @@ export function Navbar() {
                     {/* Language Switcher */}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-2 rounded-full font-bold text-slate-600">
+                            <Button variant="ghost" size="sm" className="hidden sm:flex items-center gap-2 rounded-full font-bold text-brand-muted">
                                 <Globe className="w-4 h-4" />
                                 <span>{locale.toUpperCase()}</span>
                                 <ChevronDown className="w-3 h-3 opacity-50" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-xl border-slate-100">
+                        <DropdownMenuContent align="end" className="rounded-xl border-border">
                             <DropdownMenuItem
                                 onClick={() => switchLocale("en")}
                                 className={cn("flex items-center justify-between gap-8 font-semibold", locale === "en" && "text-primary bg-primary/5")}
@@ -140,7 +140,7 @@ export function Navbar() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="group rounded-full text-slate-600 hover:text-primary relative"
+                        className="group rounded-full text-brand-muted hover:text-primary relative"
                         onClick={() => router.push(`/${locale}/hotels?wishlist=true`)}
                     >
                         <Heart className={cn("w-6 h-6 transition-all", wishlistCount > 0 ? "fill-red-500 text-red-500" : "")} />
@@ -151,14 +151,41 @@ export function Navbar() {
                         )}
                     </Button>
 
-                    {/* Profile & Auth */}
-                    <Button variant="ghost" size="icon" className="rounded-full text-slate-600 hover:text-primary">
-                        <UserCircle className="w-6 h-6" />
-                    </Button>
-
-                    <Button className="hidden sm:flex rounded-full font-bold px-6 shadow-md shadow-primary/10">
-                        {t("login")}
-                    </Button>
+                    {/* User Profile Dropdown */}
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="relative flex items-center gap-2 rounded-full font-bold text-brand-muted hover:text-primary hover:bg-surface-muted transition-all p-1 pe-3">
+                                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                                    <UserCircle className="w-6 h-6" />
+                                </div>
+                                <span className="hidden md:block text-sm">Sameh Hammad</span>
+                                <ChevronDown className="w-3 h-3 opacity-50" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-border mt-2">
+                            <div className="px-3 py-2 border-b border-surface-muted mb-1">
+                                <p className="text-[10px] font-black text-brand-muted uppercase tracking-widest">{t("profile")}</p>
+                                <p className="text-sm font-bold text-brand-dark mt-0.5 truncate">Sameh Hammad</p>
+                            </div>
+                            <DropdownMenuItem className="rounded-xl flex items-center gap-3 py-2.5 cursor-pointer focus:bg-primary/5 focus:text-primary transition-colors">
+                                <UserCircle className="w-4 h-4 opacity-70" />
+                                <span className="font-semibold">{t("profile")}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-xl flex items-center gap-3 py-2.5 cursor-pointer focus:bg-primary/5 focus:text-primary transition-colors">
+                                <Building2 className="w-4 h-4 opacity-70" />
+                                <span className="font-semibold">{t("myBookings")}</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="rounded-xl flex items-center gap-3 py-2.5 cursor-pointer focus:bg-primary/5 focus:text-primary transition-colors text-brand-muted">
+                                <Globe className="w-4 h-4 opacity-70" />
+                                <span className="font-semibold">{t("settings")}</span>
+                            </DropdownMenuItem>
+                            <div className="h-px bg-border my-1 mx-2" />
+                            <DropdownMenuItem className="rounded-xl flex items-center gap-3 py-2.5 cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/5 transition-colors">
+                                <X className="w-4 h-4" />
+                                <span className="font-bold">{t("logout")}</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
 
 
                     {/* Mobile Menu Toggle */}
@@ -175,7 +202,7 @@ export function Navbar() {
 
             {/* Mobile Navigation Drawer */}
             {mobileMenuOpen && (
-                <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-100 shadow-xl p-4 animate-in slide-in-from-top-4 duration-300">
+                <div className="lg:hidden absolute top-full left-0 right-0 bg-surface border-b border-border shadow-xl p-4 animate-in slide-in-from-top-4 duration-300">
                     <nav className="flex flex-col gap-2">
                         {navLinks.map((link) => {
                             const Icon = link.icon;
@@ -184,28 +211,50 @@ export function Navbar() {
                                     key={link.href}
                                     href={`/${locale}${link.href}`}
                                     onClick={() => setMobileMenuOpen(false)}
-                                    className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-primary/5 text-slate-700 font-bold transition-all"
+                                    className="flex items-center gap-4 p-4 rounded-2xl bg-surface-muted hover:bg-primary/5 text-brand-muted font-bold transition-all"
                                 >
-                                    <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center shadow-sm">
+                                    <div className="w-10 h-10 rounded-xl bg-surface border border-border flex items-center justify-center shadow-sm">
                                         <Icon className="w-5 h-5 text-primary" />
                                     </div>
                                     {link.label}
                                 </Link>
                             );
                         })}
-                        <div className="grid grid-cols-2 gap-4 mt-4 py-4 border-t border-slate-100">
-                            <Button
-                                variant="outline"
-                                className="rounded-xl border-slate-200 font-bold"
-                                onClick={() => switchLocale(locale === "en" ? "ar" : "en")}
-                            >
-                                <Globe className="w-4 h-4 me-2" />
-                                {locale === "en" ? "العربية" : "English"}
-                            </Button>
-                            <Button className="rounded-xl font-bold">
-                                {t("login")}
-                            </Button>
+                        <div className="flex flex-col gap-4 mt-4 py-6 border-t border-border">
+                            {/* Mobile User Info */}
+                            <div className="flex items-center gap-4 px-2 mb-2">
+                                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                                    <UserCircle className="w-7 h-7" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-brand-dark">Sameh Hammad</p>
+                                    <p className="text-xs text-brand-muted font-medium">sameh@example.com</p>
+                                </div>
+                            </div>
 
+                            <div className="grid grid-cols-1 gap-2">
+                                <Button
+                                    variant="outline"
+                                    className="rounded-2xl border-border font-bold justify-start h-14 px-6 text-brand-muted"
+                                    onClick={() => switchLocale(locale === "en" ? "ar" : "en")}
+                                >
+                                    <Globe className="w-5 h-5 me-3 text-primary" />
+                                    {locale === "en" ? "العربية" : "English"}
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="rounded-2xl border-border font-bold justify-start h-14 px-6 text-brand-muted"
+                                >
+                                    <UserCircle className="w-5 h-5 me-3 text-primary" />
+                                    {t("profile")}
+                                </Button>
+                                <Button
+                                    className="rounded-2xl font-black h-14 px-6 bg-destructive/5 text-destructive hover:bg-destructive/10 border-none shadow-none justify-start"
+                                >
+                                    <X className="w-5 h-5 me-3" />
+                                    {t("logout")}
+                                </Button>
+                            </div>
                         </div>
                     </nav>
                 </div>

@@ -70,82 +70,65 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     });
 
     // --- Data selection logic ---
-    let hotels: Hotel[] = [];
+    let allHotels: Hotel[] = [];
 
     if (wishlistTokens) {
-        if (page > 1) {
-            hotels = [];
-        } else if (wishlistTokens.length > 0) {
-            // [Wishlist Mode]: IGNORE city query, return specific requested tokens
-            const tokens = wishlistTokens.split(",");
-            for (const token of tokens) {
-                const foundMock = MOCK_HOTELS.find(h => h.property_token === token);
-                if (foundMock) {
-                    hotels.push(foundMock);
-                } else {
-                    // Regex parses: "mock_page1_token_New_York_5" -> page=1, city="New_York", idx=5
-                    const match = token.match(/^mock_page(\d+)_token_(.+)_(\d+)$/);
-                    if (match) {
-                        const pageVal = parseInt(match[1], 10);
-                        const cityStr = match[2].replace(/_/g, " ");
-                        const idx = parseInt(match[3], 10);
+        // [Wishlist Mode]: return specific requested tokens
+        const tokens = wishlistTokens.split(",");
+        for (const token of tokens) {
+            const foundMock = MOCK_HOTELS.find(h => h.property_token === token);
+            if (foundMock) {
+                allHotels.push(foundMock);
+            } else {
+                const match = token.match(/^mock_page(\d+)_token_(.+)_(\d+)$/);
+                if (match) {
+                    const pageVal = parseInt(match[1], 10);
+                    const cityStr = match[2].replace(/_/g, " ");
+                    const idx = parseInt(match[3], 10);
 
-                        const matchedCity = CITY_SUGGESTIONS.find(c => c.name.toLowerCase() === cityStr.toLowerCase());
-                        if (matchedCity) {
-                            const generated = generateMoreHotels(
-                                pageVal,
-                                matchedCity.name,
-                                matchedCity.country,
-                                matchedCity.lat,
-                                matchedCity.lng
-                            );
-                            if (generated[idx]) {
-                                hotels.push(generated[idx]);
-                            }
+                    const matchedCity = CITY_SUGGESTIONS.find(c => c.name.toLowerCase() === cityStr.toLowerCase());
+                    if (matchedCity) {
+                        const generated = generateMoreHotels(
+                            pageVal,
+                            matchedCity.name,
+                            matchedCity.country,
+                            matchedCity.lat,
+                            matchedCity.lng
+                        );
+                        if (generated[idx]) {
+                            allHotels.push(generated[idx]);
                         }
                     }
                 }
             }
         }
     } else {
-        // [Normal search Mode]: Use city query 
-        if (page === 1) {
-            if (!q || q.length < 2) {
-                // No query → show all mock hotels
-                hotels = [...MOCK_HOTELS];
-            } else if (matchedCity) {
-                // Matched a known city → combine MOCK + Generated hotels for that city
-                const cityMocks = MOCK_HOTELS.filter(
-                    (h) => h.city.toLowerCase() === matchedCity.name.toLowerCase()
-                );
-                const generated = generateMoreHotels(
-                    1,
-                    matchedCity.name,
-                    matchedCity.country,
-                    matchedCity.lat,
-                    matchedCity.lng
-                );
-                hotels = [...cityMocks, ...generated];
-            } else {
-                // Unknown city query → return empty (no wrong fallback!)
-                hotels = [];
+        // [Normal search Mode]: Aggregate multiple "pages" of generated data to have a large pool to slice from
+        if (!q || q.length < 2) {
+            allHotels = [...MOCK_HOTELS];
+            // Add some generated featured hotels
+            for (let p = 1; p <= 3; p++) {
+                allHotels = [...allHotels, ...generateMoreHotels(p, "Featured", "", 0, 0)];
             }
-        } else {
-            if (matchedCity) {
-                hotels = generateMoreHotels(
-                    page,
+        } else if (matchedCity) {
+            const cityMocks = MOCK_HOTELS.filter(
+                (h) => h.city.toLowerCase() === matchedCity.name.toLowerCase()
+            );
+            allHotels = [...cityMocks];
+            // Generate pool of 5 "pages" worth of data
+            for (let p = 1; p <= 5; p++) {
+                allHotels = [...allHotels, ...generateMoreHotels(
+                    p,
                     matchedCity.name,
                     matchedCity.country,
                     matchedCity.lat,
                     matchedCity.lng
-                );
-            } else if (!q) {
-                hotels = generateMoreHotels(page, "Featured", "", 0, 0);
-            } else {
-                hotels = [];
+                )];
             }
         }
     }
+
+    let hotels = allHotels;
 
     // --- Apply Filters ---
     if (propertyName) {
@@ -193,6 +176,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     // --- (Transformation block removed: hotels are now always fetched for the correct city) ---
 
     // --- Bounds Filtering (Bypass if specific property is searched) ---
+    /* 
     if (boundsStr && !propertyName) {
         const parts = boundsStr.split(",").map(Number);
         if (parts.length === 4) {
@@ -203,6 +187,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             });
         }
     }
+    */
 
     // --- Pricing Realism ---
     const checkIn = new Date(check_in_date);
@@ -224,9 +209,28 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         };
     });
 
+    // --- Sorting logic ---
+    const sortBy = searchParams.get("sort_by") || "recommended";
+    if (sortBy === "price_asc") {
+        hotels.sort((a, b) => {
+            const priceA = a.price_per_night?.extracted_price || 0;
+            const priceB = b.price_per_night?.extracted_price || 0;
+            return priceA - priceB;
+        });
+    } else if (sortBy === "rating") {
+        hotels.sort((a, b) => {
+            const ratingA = a.rating || 0;
+            const ratingB = b.rating || 0;
+            return ratingB - ratingA;
+        });
+    }
+
     const totalResults = hotels.length;
-    const recordsFrom = (page - 1) * PAGE_SIZE + 1;
-    const recordsTo = recordsFrom + hotels.length - 1;
+    const startIndex = (page - 1) * PAGE_SIZE;
+    const paginatedHotels = hotels.slice(startIndex, startIndex + PAGE_SIZE);
+
+    const recordsFrom = startIndex + 1;
+    const recordsTo = recordsFrom + paginatedHotels.length - 1;
 
     const response: HotelsApiResponse = {
         search_metadata: {
@@ -254,11 +258,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         search_information: {
             total_results: totalResults,
         },
-        properties: hotels,
+        properties: paginatedHotels,
         pagination: {
             records_from: recordsFrom,
             records_to: recordsTo,
-            ...((page < 5 && !wishlistTokens) ? { next_page_token: `page_${page + 1}_token` } : {}),
+            ...((startIndex + PAGE_SIZE < totalResults && !wishlistTokens) ? { next_page_token: `page_${page + 1}_token` } : {}),
         },
     };
 

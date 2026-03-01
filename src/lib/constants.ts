@@ -10,7 +10,7 @@ export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
     bounds: null,
 };
 
-export const PAGE_SIZE = 20;
+export const PAGE_SIZE = 5;
 
 export const GOOGLE_MAPS_API_KEY =
     process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? "";

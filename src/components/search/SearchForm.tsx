@@ -4,7 +4,7 @@
 
 import { useState, useEffect, useRef, FormEvent } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { format } from "date-fns";
 import { Search, MapPin, Calendar } from "lucide-react";
 import useHotelsStore from "@/store/hotels.store";
@@ -28,6 +28,7 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
+    const locale = useLocale();
 
     //---** Helper function to safely parse date strings from URL parameters **---//
     const safeDateParse = (dateStr: string | null | undefined, fallback: Date) => {
@@ -201,8 +202,8 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
     return (
         <div className={cn(
             "flex flex-col gap-6 w-full transition-all duration-300",
-            !isHeader && "bg-white p-6 sm:p-8 rounded-[2rem] shadow-2xl border border-slate-100",
-            isHeader && "bg-white p-0",
+            !isHeader && "bg-surface p-6 sm:p-8 rounded-4xl shadow-2xl border border-border",
+            isHeader && "bg-surface p-0",
             className
         )}>
             {/*---** Form container orchestrating the primary search inputs with responsive grid **---*/}
@@ -211,11 +212,11 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
 
                     {/*---** Destination/Location input section **---*/}
                     <div className={cn(
-                        "flex flex-col gap-1 px-4 py-2 bg-white border border-slate-200 rounded-2xl lg:flex-[1.5] relative min-w-0 md:min-w-[200px]",
+                        "flex flex-col gap-1 px-4 py-2 bg-surface border border-border rounded-2xl lg:flex-[1.5] relative min-w-0 md:min-w-[200px]",
                         isHeader ? "h-[72px] justify-center" : "h-20 justify-center"
                     )}>
-                        <label className="text-[11px] font-bold text-slate-900 flex items-center gap-2">
-                            <MapPin className="w-3.5 h-3.5 text-slate-900" />
+                        <label className="text-[11px] font-bold text-brand-dark flex items-center gap-2">
+                            <MapPin className="w-3.5 h-3.5 text-brand-dark" />
                             {t("locationLabel")}
                         </label>
                         <div className="relative w-full" ref={suggestionsRef}>
@@ -224,28 +225,27 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                                 onChange={(e) => handleLocationChange(e.target.value)}
                                 onFocus={() => location.length >= 2 && setShowSuggestions(suggestions.length > 0)}
                                 placeholder={t("locationPlaceholder")}
-                                className="h-8 p-0 border-none shadow-none focus-visible:ring-0 font-bold text-slate-600 text-[15px] placeholder:text-slate-400 placeholder:font-normal"
+                                className="h-8 p-0 text-start border-none shadow-none focus-visible:ring-0 font-bold text-brand-muted text-[15px] placeholder:text-brand-muted/50 placeholder:font-normal"
                                 required
                                 autoComplete="off"
-                                dir="auto"
                             />
                             {/*---** Fuzzy search suggestions dropdown results **---*/}
                             {showSuggestions && (
-                                <div className="absolute top-[calc(100%+12px)] start-[-16px] end-[-16px] bg-white rounded-2xl shadow-2xl border border-slate-100 py-3 z-[110] overflow-hidden">
+                                <div className="absolute top-[calc(100%+12px)] start-[-16px] end-[-16px] bg-surface rounded-2xl shadow-2xl border border-border py-3 z-[110] overflow-hidden">
                                     <div className="max-h-[300px] overflow-y-auto px-2">
                                         {suggestions.map((city) => (
                                             <button
                                                 key={city.id}
                                                 type="button"
                                                 onClick={() => handleSelectSuggestion(city, `${city.name}, ${city.country}`)}
-                                                className="w-full px-4 py-3 flex items-center gap-4 hover:bg-slate-50 rounded-xl transition-all text-left group"
+                                                className="w-full px-4 py-3 flex items-center gap-4 hover:bg-surface-muted rounded-xl transition-all text-left group"
                                             >
-                                                <div className="bg-slate-100 p-2.5 rounded-xl text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                                <div className="bg-surface-muted p-2.5 rounded-xl text-brand-muted group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                                     <MapPin className="h-5 w-5" />
                                                 </div>
                                                 <div>
-                                                    <div className="font-bold text-slate-800 text-sm group-hover:text-primary">{city.name}</div>
-                                                    <div className="text-[11px] text-slate-400 font-medium">{city.country}</div>
+                                                    <div className="font-bold text-brand-dark text-sm group-hover:text-primary">{city.name}</div>
+                                                    <div className="text-[11px] text-brand-muted font-medium">{city.country}</div>
                                                 </div>
                                             </button>
                                         ))}
@@ -257,37 +257,49 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
 
                     {/*---** Date selection section **---*/}
                     <div className={cn(
-                        "flex flex-col gap-1 px-4 py-2 bg-white border border-slate-200 rounded-2xl lg:flex-1 relative min-w-0 md:min-w-[200px]",
-                        isHeader ? "h-[72px] justify-center" : "h-20 justify-center"
+                        "flex items-center bg-surface border border-border rounded-2xl divide-x divide-border lg:flex-[1.2] relative min-w-0 md:min-w-[320px]",
+                        isHeader ? "h-[72px]" : "h-20"
                     )}>
-                        <label className="text-[11px] font-bold text-slate-900 flex items-center gap-2">
-                            <Calendar className="w-3.5 h-3.5 text-slate-900" />
-                            {t("datesLabel")}
-                        </label>
-                        <div className="flex items-center gap-1 w-full">
-                            <DatePicker
-                                date={checkIn}
-                                onSelect={setCheckIn}
-                                variant="minimal"
-                                label={t("checkInLabel")}
-                            />
-                            <span className="text-slate-300">-</span>
-                            <DatePicker
-                                date={checkOut}
-                                onSelect={setCheckOut}
-                                variant="minimal"
-                                minDate={checkIn}
-                                label={t("checkOutLabel")}
-                            />
+                        {/*---** Check-in Date **---*/}
+                        <div className="flex-1 flex flex-col justify-center px-4 h-full hover:bg-surface-muted transition-colors rounded-s-2xl cursor-pointer">
+                            <label className="text-[10px] font-black text-brand-muted uppercase tracking-widest mb-0.5 text-start">
+                                {t("checkInLabel")}
+                            </label>
+                            <div className="flex items-center gap-2">
+                                <Calendar className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                                <DatePicker
+                                    date={checkIn}
+                                    onSelect={setCheckIn}
+                                    variant="minimal"
+                                    label={t("checkInLabel")}
+                                />
+                            </div>
+                        </div>
+
+                        {/*---** Check-out Date **---*/}
+                        <div className="flex-1 flex flex-col justify-center px-4 h-full hover:bg-surface-muted transition-colors rounded-e-2xl cursor-pointer">
+                            <label className="text-[10px] font-black text-brand-muted uppercase tracking-widest mb-0.5 text-start">
+                                {t("checkOutLabel")}
+                            </label>
+                            <div className="flex items-center gap-2">
+                                <Calendar className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                                <DatePicker
+                                    date={checkOut}
+                                    onSelect={setCheckOut}
+                                    variant="minimal"
+                                    minDate={checkIn}
+                                    label={t("checkOutLabel")}
+                                />
+                            </div>
                         </div>
                     </div>
 
                     {/*---** Guest selection and Search button - Integrated for better mobile flow **---*/}
                     <div className={cn(
-                        "flex flex-row items-stretch gap-2 md:col-span-2 lg:col-span-1 lg:flex-1",
+                        "flex flex-row items-center gap-2 md:col-span-2 lg:col-span-1 lg:flex-1",
                     )}>
                         <div className={cn(
-                            "bg-white border border-slate-200 rounded-2xl flex-1 relative min-w-0 transition-all hover:border-primary/30 flex items-center px-4",
+                            "bg-surface border border-border rounded-2xl flex-1 relative min-w-0 transition-all hover:border-primary/30 flex items-center px-4",
                             isHeader ? "h-[72px]" : "h-20"
                         )}>
                             <GuestsSelector
@@ -300,12 +312,12 @@ export function SearchForm({ className = "", variant = "hero" }: SearchFormProps
                         <Button
                             type="submit"
                             className={cn(
-                                "rounded-2xl lg:rounded-full p-0 flex items-center justify-center bg-[#051c34] hover:bg-[#0a2f58] shadow-xl transition-all hover:scale-105 active:scale-95 shrink-0",
+                                "rounded-2xl lg:rounded-full p-0 flex items-center justify-center bg-primary hover:bg-primary-hover shadow-xl transition-all hover:scale-105 active:scale-95 shrink-0",
                                 isHeader ? "w-[56px] h-[56px] lg:w-[56px] lg:h-[56px]" : "w-20 h-20 lg:w-16 lg:h-16",
                                 "aspect-square"
                             )}
                         >
-                            <Search className="h-6 w-6 text-white" />
+                            <Search size={24} className="text-white" />
                         </Button>
                     </div>
                 </div>

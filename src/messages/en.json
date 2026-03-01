@@ -14,7 +14,13 @@
         "flights": "Flights",
         "cars": "Cars",
         "tours": "Tours",
-        "login": "Login"
+        "login": "Login",
+        "profile": "Profile",
+        "myBookings": "My Bookings",
+        "settings": "Settings",
+        "about": "About Us",
+        "contact": "Contact",
+        "logout": "Logout"
     },
     "search": {
         "title": "Find Your Perfect Hotel",
@@ -139,5 +145,68 @@
         "notFound": "Page not found",
         "serverError": "Server error, please try again",
         "network": "Network error, check your connection"
+    },
+    "about": {
+        "title": "About HotelSearch",
+        "subtitle": "Redefining the way you travel and explore the world.",
+        "ourMission": "Our Mission",
+        "missionDesc": "To provide travelers with the most seamless, transparent, and rewarding hotel booking experience possible.",
+        "whyUs": "Why Choose Us?",
+        "bestPrices": "Best Price Guarantee",
+        "bestPricesDesc": "We ensure you get the best deals across millions of properties worldwide.",
+        "globalReach": "Global Reach",
+        "globalReachDesc": "From boutique riads to international luxury chains, we cover it all.",
+        "trust": "Trust & Security",
+        "trustDesc": "Your bookings and data are protected by industry-leading security standards.",
+        "stats": {
+            "hotels": "Hotels Worldwide",
+            "users": "Happy Travelers",
+            "countries": "Countries Reached"
+        }
+    },
+    "contact": {
+        "title": "Contact Us",
+        "subtitle": "We're here to help you with your journey. Reach out anytime.",
+        "getInTouch": "Get in Touch",
+        "name": "Full Name",
+        "email": "Email Address",
+        "subject": "Subject",
+        "message": "Your Message",
+        "namePlaceholder": "John Doe",
+        "emailPlaceholder": "john@example.com",
+        "subjectPlaceholder": "How can we help?",
+        "messagePlaceholder": "Write your message here...",
+        "send": "Send Message",
+        "sending": "Sending...",
+        "success": "Message sent successfully!",
+        "error": "Failed to send message. Please try again.",
+        "office": "Main Office",
+        "address": "123 Travel Avenue, Dubai, UAE",
+        "emailValue": "support@hotelsearch.com",
+        "phoneValue": "+971 4 123 4567",
+        "phone": "Phone",
+        "emailLabel": "Email"
+    },
+    "home": {
+        "quickSearch": {
+            "title": "Quick Search",
+            "subtitle": "Discover top destinations with one click"
+        },
+        "destinations": {
+            "dubai": "Dubai",
+            "cairo": "Cairo",
+            "newyork": "New York",
+            "london": "London",
+            "paris": "Paris",
+            "tokyo": "Tokyo"
+        },
+        "features": {
+            "title": "Experience the Best",
+            "subtitle": "Everything you need for a perfect stay"
+        },
+        "popularHotels": {
+            "title": "Popular Hotels",
+            "subtitle": "Trending properties our users love"
+        }
     }
 }

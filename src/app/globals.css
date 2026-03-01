@@ -1,14 +1,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: hsl(0 0% 100%);
+  --color-background: hsl(210 40% 98%);
   --color-foreground: hsl(222.2 84% 4.9%);
   --color-card: hsl(0 0% 100%);
   --color-card-foreground: hsl(222.2 84% 4.9%);
   --color-popover: hsl(0 0% 100%);
   --color-popover-foreground: hsl(222.2 84% 4.9%);
+
+  /* Brand Colors */
   --color-primary: hsl(158 64% 52%);
   --color-primary-foreground: hsl(210 40% 98%);
+  --color-brand-dark: #051c34;
+  --color-brand-dark-hover: #0a2f58;
+  --color-brand-muted: #64748b;
+  --color-brand-light: #f1f5f9;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+
+  /* Functional Colors */
   --color-secondary: hsl(210 40% 96.1%);
   --color-secondary-foreground: hsl(222.2 47.4% 11.2%);
   --color-muted: hsl(210 40% 96.1%);
@@ -20,7 +30,17 @@
   --color-border: hsl(214.3 31.8% 91.4%);
   --color-input: hsl(214.3 31.8% 91.4%);
   --color-ring: hsl(158 64% 52%);
+
+  /* Gradients */
+  --color-hero-start: #4f46e5;
+  --color-hero-mid: #7c3aed;
+  --color-hero-end: #2563eb;
+
   --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --radius-4xl: 2rem;
+  --radius-5xl: 2.5rem;
 
   --color-trip-green: hsl(158 64% 52%);
   --color-trip-green-light: hsl(158 64% 95%);
@@ -60,12 +80,7 @@
   body {
     background-color: #f8fafc;
     color: #0f172a;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
-  }
-
-  html[dir="rtl"] body {
-    font-family: 'Cairo', 'Inter', system-ui, sans-serif;
   }
 }
 

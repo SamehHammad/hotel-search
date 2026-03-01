@@ -44,7 +44,7 @@ export function DatePicker({ date, onSelect, label, minDate, variant = "default"
         <div className={cn("flex flex-col gap-1.5 w-full", !isMinimal && "flex-1 sm:min-w-[160px]")}>
             {/*---** Optional field label for standard layout forms **---*/}
             {!isMinimal && (
-                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] ps-1">
+                <label className="text-[10px] font-bold text-brand-muted uppercase tracking-[0.1em] ps-1">
                     {label}
                 </label>
             )}
@@ -56,9 +56,9 @@ export function DatePicker({ date, onSelect, label, minDate, variant = "default"
                         variant={isMinimal ? "ghost" : "outline"}
                         className={cn(
                             isMinimal
-                                ? "h-auto p-0 hover:bg-transparent font-bold text-slate-600 text-[15px] justify-start"
-                                : "w-full justify-start text-start font-bold h-12 bg-white rounded-xl shadow-sm border-slate-200 hover:border-primary hover:bg-primary/5 transition-all text-sm",
-                            !isValidDate(date) && "text-slate-400 font-medium"
+                                ? "h-auto p-0 hover:bg-transparent font-bold text-brand-muted text-[15px] justify-start"
+                                : "w-full justify-start text-start font-bold h-12 bg-surface rounded-xl shadow-sm border-border hover:border-primary hover:bg-primary/5 transition-all text-sm",
+                            !isValidDate(date) && "text-brand-muted/60 font-medium"
                         )}
                     >
                         {!isMinimal && <CalendarIcon className="mr-2 h-4 w-4 shrink-0 text-primary" />}
@@ -67,9 +67,9 @@ export function DatePicker({ date, onSelect, label, minDate, variant = "default"
                 </PopoverTrigger>
 
                 {/*---** Popover Overlay: Contains the interactive calendar grid **---*/}
-                <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-slate-100 overflow-hidden" align="start">
+                <PopoverContent className="w-auto p-0 rounded-2xl shadow-2xl border-border overflow-hidden" align="start">
                     {/*---** Thematic header showing full selected date text **---*/}
-                    <div className="bg-[#051c34] p-4 text-white">
+                    <div className="bg-brand-dark p-4 text-white">
                         <p className="text-xs font-bold uppercase opacity-80 tracking-widest">{label}</p>
                         <p className="text-xl font-bold">{isValidDate(date) ? format(date, "EEEE, MMM dd") : t("selectDate")}</p>
                     </div>
@@ -95,7 +95,7 @@ export function DatePicker({ date, onSelect, label, minDate, variant = "default"
                     />
 
                     {/*---** Footer action to clear current selection **---*/}
-                    <div className="p-3 border-t border-slate-50 flex justify-end">
+                    <div className="p-3 border-t border-border flex justify-end">
                         <Button variant="ghost" size="sm" className="text-primary font-bold hover:bg-primary/5 rounded-lg" onClick={() => onSelect(undefined)}>
                             {t("clear")}
                         </Button>
