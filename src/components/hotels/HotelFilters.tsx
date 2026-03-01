@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { Search, MapIcon, Star, Filter, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -253,14 +254,14 @@ export function HotelFilters({ onViewMap }: HotelFiltersProps) {
 }
 
 //---** Helper component for rendering map placeholder graphic **---//
-import Image from "next/image";
-
 function ImagePreview() {
     return (
         <Image
             src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=1000&auto=format&fit=crop"
             alt="Map preview showing locations in the current region"
             fill
+            sizes="(max-width: 768px) 100vw, 360px"
+            priority
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-80"
         />
     )

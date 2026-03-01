@@ -16,6 +16,36 @@ A high-performance, production-ready hotel search interface built with **Next.js
 
 ---
 
+### ✅ How to Use
+
+#### 1) Search hotels
+- In Open `http://localhost:3000/hotels`.
+- Or production Open `https://hotelsearch1.vercel.app/hotels`.
+- Use the search input to change the destination (ex: city name).
+- Use the filters (guests/rooms, etc.) to refine results.
+- Scroll to load more hotels (infinite scroll).
+
+#### 2) View hotel details
+- Click any hotel card from the results.
+- You will be redirected to the hotel details page at `/hotels/[token]`.
+
+#### 3) View hotels on the map
+- The map renders alongside the results.
+- Zoom in/out using the map controls.
+- Hover over a price marker to preview the hotel (image/name/rating/price).
+- Drag/zoom the map to explore a different area; results update based on the visible bounds.
+
+---
+
+### 🔑 Important: Google Maps API Key
+
+The map will only load if you provide a valid Google Maps API key.
+
+- Set `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` in your local `.env.local` and `.env` in production(recommended).
+- This project also supports `NEXT_PUBLIC_GOOGLE_MAPS_MAP_KEY` as a fallback but maybe not allowing the current app production domain `https://hotelsearch1.vercel.app`.
+
+If the key is missing or invalid, the UI will show a map error (ex: "Failed to load Google Maps").
+
 ####  SSR: Hotels Search (`/hotels`)
 - **Server-Side Fetching**: Parses `searchParams` and fetches data on the server.
 - **Instant Paint**: Real results are included in the initial HTML, no client fetch delay.
