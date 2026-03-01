@@ -17,9 +17,11 @@ export function buildMetadata({
     path,
     locale,
 }: SeoConfig): Metadata {
-    const url = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://hotelsearch.app"}/${locale}${path}`;
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://hotelsearch.app"}/${locale}${path}`;
+    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3000";
 
     return {
+        metadataBase: new URL(baseUrl),
         title: `${title} | ${SITE_NAME}`,
         description,
         manifest: "/site.webmanifest",

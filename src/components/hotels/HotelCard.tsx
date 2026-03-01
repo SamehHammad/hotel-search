@@ -122,7 +122,7 @@ export const HotelCard = memo(function HotelCard({ hotel, priority }: HotelCardP
                         sizes="(max-width:640px) 100vw, 280px"
                         className="object-cover z-10 relative transition-transform duration-700 group-hover:scale-[1.03]"
                         priority={priority}
-                        loading={priority ? undefined : "lazy"}
+                        loading={priority ? "eager" : "lazy"}
                     />
 
                     {/*---** Wishlist toggle button **---*/}
